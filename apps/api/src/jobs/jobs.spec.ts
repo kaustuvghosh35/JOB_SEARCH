@@ -130,6 +130,20 @@ describe('buildQueries', () => {
     expect(nk.query).toContain('site:naukri.com');
     expect(buildQueries(profile, { role: 'SRE', location: 'Pune' })[0].query).toMatch(/SRE.*Pune$/);
   });
+
+  it('adds years of experience and a seniority word', () => {
+    const senior: Profile = { ...profile, seniority: 'senior', yearsOfExperience: 8 };
+    const [li] = buildQueries(senior);
+    expect(li.query).toBe('site:linkedin.com/jobs/view senior Backend Engineer TypeScript NestJS PostgreSQL 8 years Bengaluru');
+  });
+
+  it('skips seniority for mid level, fresher years, and roles that already name a level', () => {
+    expect(buildQueries(profile)[0].query).not.toMatch(/\b(senior|junior|lead)\b/);
+    expect(buildQueries({ ...profile, yearsOfExperience: 0.5 })[0].query).not.toContain('years');
+    const senior: Profile = { ...profile, seniority: 'senior' };
+    expect(buildQueries(senior, { role: 'Sr. Backend Engineer' })[0].query).not.toMatch(/senior Sr\./);
+    expect(buildQueries(senior, { role: 'Lead Backend Engineer' })[0].query.match(/senior/gi)).toBeNull();
+  });
 });
 
 describe('JobsService', () => {
