@@ -69,6 +69,13 @@ describe('VersionsService', () => {
     expect(inputs[0]).toMatchObject({ base: undefined, extra: undefined });
     expect(inputs[1]).toMatchObject({ extra: 'It served 500 daily users.', base: { fullName: 'Asha Rao' } });
     expect(v2.resume.openQuestions).toEqual([]);
+    expect(v2.previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
+    expect(svc.latest(row.id).previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
+  });
+
+  it('has no previous version on the first improve', async () => {
+    const { svc, row } = setup(improved('Led a team of 4.'));
+    expect((await svc.improve(row.id)).previous).toBeNull();
   });
 
   it('404s before any version and exports with a clean filename', async () => {

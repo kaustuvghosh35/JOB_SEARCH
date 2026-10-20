@@ -70,6 +70,7 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
   const [targetRole, setTargetRole] = useState(defaultRole);
   const [extra, setExtra] = useState("");
   const [revise, setRevise] = useState(true);
+  const [compare, setCompare] = useState<"previous" | "original">("previous");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -168,8 +169,33 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <h3 className="font-mono text-xs uppercase text-muted-foreground">Before</h3>
-              <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap rounded-lg border border-border p-4 font-sans text-sm">{original ?? ""}</pre>
+              <div className="flex items-center gap-3">
+                <h3 className="font-mono text-xs uppercase text-muted-foreground">Before</h3>
+                {version.previous && (
+                  <div role="group" aria-label="Compare with" className="flex gap-1 text-xs">
+                    {(["previous", "original"] as const).map((k) => (
+                      <button
+                        key={k}
+                        type="button"
+                        aria-pressed={compare === k}
+                        onClick={() => setCompare(k)}
+                        className={`rounded-md border px-2 py-0.5 focus-visible:outline-2 ${
+                          compare === k ? "border-foreground bg-primary text-primary-foreground" : "border-border hover:bg-muted"
+                        }`}
+                      >
+                        {k === "previous" ? "Previous version" : "Original upload"}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {version.previous && compare === "previous" ? (
+                <div className="max-h-[70vh] overflow-auto rounded-lg border border-border p-4">
+                  <ResumeView resume={version.previous} />
+                </div>
+              ) : (
+                <pre className="max-h-[70vh] overflow-auto whitespace-pre-wrap rounded-lg border border-border p-4 font-sans text-sm">{original ?? ""}</pre>
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <h3 className="font-mono text-xs uppercase text-muted-foreground">After</h3>

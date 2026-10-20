@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import type { ImprovedResume } from '@job-search/shared';
 import { DB, type Db } from '../../db/db.module.js';
 import { resumeVersions } from '../../db/schema/index.js';
@@ -18,13 +18,14 @@ export class VersionRepository {
     return this.db.select().from(resumeVersions).where(eq(resumeVersions.id, id)).get() as VersionRow | undefined;
   }
 
-  latest(resumeId: string): VersionRow | undefined {
+  latest(resumeId: string, skip = 0): VersionRow | undefined {
     return this.db
       .select()
       .from(resumeVersions)
       .where(eq(resumeVersions.resumeId, resumeId))
-      .orderBy(desc(resumeVersions.createdAt), desc(resumeVersions.id))
+      .orderBy(desc(resumeVersions.createdAt), sql`rowid desc`)
       .limit(1)
+      .offset(skip)
       .get() as VersionRow | undefined;
   }
 }

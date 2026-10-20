@@ -10,11 +10,12 @@ export type ExportFormat = 'docx' | 'pdf';
 
 export type ImproveOptions = { targetRole?: string; extra?: string; revise?: boolean };
 
-const toVersion = (v: VersionRow): ImprovedVersion => ({
+const toVersion = (v: VersionRow, previous: VersionRow | undefined = undefined): ImprovedVersion => ({
   id: v.id,
   resumeId: v.resumeId,
   createdAt: v.createdAt.toISOString(),
   resume: v.improved,
+  previous: previous?.improved ?? null,
 });
 
 @Injectable()
@@ -29,7 +30,8 @@ export class VersionsService {
   async improve(resumeId: string, opts: ImproveOptions = {}): Promise<ImprovedVersion> {
     const row = this.resumes.getRow(resumeId);
     const extra = opts.extra?.trim() || undefined;
-    const base = opts.revise ? this.versions.latest(resumeId)?.improved : undefined;
+    const prior = this.versions.latest(resumeId);
+    const base = opts.revise ? prior?.improved : undefined;
     const improved = await this.improver.improve({
       original: row.originalText,
       targetRole: opts.targetRole?.trim() || undefined,
@@ -37,14 +39,14 @@ export class VersionsService {
       base,
     });
     const known = [row.originalText, extra, base && JSON.stringify(base)].filter(Boolean).join('\n');
-    return toVersion(this.versions.create(resumeId, withFactWarnings(known, improved)));
+    return toVersion(this.versions.create(resumeId, withFactWarnings(known, improved)), prior);
   }
 
   latest(resumeId: string): ImprovedVersion {
     this.resumes.getRow(resumeId);
     const v = this.versions.latest(resumeId);
     if (!v) throw new NotFoundException('No improved version yet.');
-    return toVersion(v);
+    return toVersion(v, this.versions.latest(resumeId, 1));
   }
 
   async export(resumeId: string, format: ExportFormat, versionId?: string) {

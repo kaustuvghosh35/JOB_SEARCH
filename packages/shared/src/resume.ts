@@ -26,6 +26,7 @@ export type ImprovedVersion = {
   resumeId: string;
   createdAt: string;
   resume: ImprovedResume;
+  previous: ImprovedResume | null;
 };
 
 export type ResumeView = {
