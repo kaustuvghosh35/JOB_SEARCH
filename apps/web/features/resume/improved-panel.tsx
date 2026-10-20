@@ -171,6 +171,7 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-3">
                 <h3 className="font-mono text-xs uppercase text-muted-foreground">Before</h3>
+                {!version.previous && <span className="text-xs text-muted-foreground">Original upload (first version, nothing earlier to compare)</span>}
                 {version.previous && (
                   <div role="group" aria-label="Compare with" className="flex gap-1 text-xs">
                     {(["previous", "original"] as const).map((k) => (
