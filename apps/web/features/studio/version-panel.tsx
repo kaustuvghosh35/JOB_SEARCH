@@ -62,6 +62,7 @@ export function VersionPanel({
   externalBusy?: boolean;
 }) {
   const [ready, setReady] = useState(false);
+  const wanted = targetRole.trim();
   const [original, setOriginal] = useState<string | null>(null);
   const [version, setVersion] = useState<ImprovedVersion | null>(null);
   const [extra, setExtra] = useState("");
@@ -70,6 +71,8 @@ export function VersionPanel({
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const current = version?.resume.targetRole?.trim() ?? "";
+  const retailor = version !== null && current.toLowerCase() !== wanted.toLowerCase();
 
   useEffect(() => {
     api<{ text: string }>(`/resumes/${resumeId}/original`).then((r) => setOriginal(r.text)).catch(() => {});
@@ -119,18 +122,31 @@ export function VersionPanel({
         }}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="min-w-0 text-sm text-muted-foreground">
-            {targetRole.trim() ? (
+          <p className="min-w-0 text-sm text-muted-foreground" aria-live="polite">
+            {!version ? (
+              wanted ? (
+                <>
+                  Will be tailored for <b className="font-medium text-foreground">{wanted}</b>
+                </>
+              ) : (
+                "Set a role above to tailor the resume to it."
+              )
+            ) : retailor ? (
               <>
-                Tailored for <span className="font-medium text-foreground">{targetRole.trim()}</span>
+                Tailored for <b className="font-medium text-foreground">{current || "no specific role"}</b>. Press the button to tailor it for{" "}
+                <b className="font-medium text-foreground">{wanted || "no specific role"}</b>.
+              </>
+            ) : current ? (
+              <>
+                Tailored for <b className="font-medium text-foreground">{current}</b>
               </>
             ) : (
-              "Not tailored to a role. Set one above to focus the resume."
+              "Not tailored to a specific role."
             )}
           </p>
           <Button type="submit" disabled={busy || loading || externalBusy}>
             {busy && <Spinner />}
-            {busy ? "Improving..." : version ? "Improve again" : "Improve my resume"}
+            {busy ? "Improving..." : !version ? "Improve my resume" : retailor ? "Tailor for this role" : "Improve again"}
           </Button>
         </div>
         <details className="text-sm">

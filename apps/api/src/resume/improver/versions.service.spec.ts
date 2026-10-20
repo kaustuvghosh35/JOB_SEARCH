@@ -106,6 +106,26 @@ describe('VersionsService', () => {
     expect(resumeToText(improved('Led a team of 4.'))).toContain('- Led a team of 4.');
   });
 
+  it('remembers the role a version was tailored for and tells the improver what it was before', async () => {
+    const inputs: { targetRole?: string; previousRole?: string | null }[] = [];
+    const db = openDb(':memory:');
+    const row = db.insert(resumes).values({ originalText: original, expiresAt: new Date(Date.now() + 1e6) }).returning().get();
+    const svc = new VersionsService(
+      { getRow: () => row } as unknown as ResumeService,
+      { improve: async (i: (typeof inputs)[number]) => (inputs.push(i), improved('Led a team of 4.')) } as unknown as ResumeImproverService,
+      new VersionRepository(db),
+      new ResumeExportService(),
+      {} as unknown as ProfileService,
+    );
+
+    const v1 = await svc.improve(row.id, { targetRole: ' Consultant ' });
+    expect(v1.resume.targetRole).toBe('Consultant');
+    const v2 = await svc.improve(row.id, { targetRole: 'CEO', revise: true });
+    expect(inputs[1]).toMatchObject({ targetRole: 'CEO', previousRole: 'Consultant' });
+    expect(v2.resume.targetRole).toBe('CEO');
+    expect((await svc.improve(row.id)).resume.targetRole).toBeNull();
+  });
+
   it('has no previous version on the first improve', async () => {
     const { svc, row } = setup(improved('Led a team of 4.'));
     expect((await svc.improve(row.id)).previous).toBeNull();

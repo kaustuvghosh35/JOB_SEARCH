@@ -27,7 +27,8 @@ export const improvedResumeSchema = z.object({
 
 export type ResumeEntry = z.infer<typeof entrySchema>;
 export type ResumeSection = z.infer<typeof sectionSchema>;
-export type ImprovedResume = z.infer<typeof improvedResumeSchema>;
+// targetRole is stored by the server with each version; the model does not produce it.
+export type ImprovedResume = z.infer<typeof improvedResumeSchema> & { targetRole?: string | null };
 
 type Legacy = {
   fullName?: string | null;
@@ -38,6 +39,7 @@ type Legacy = {
   skills?: string[];
   extras?: { title: string; items: string[] }[];
   sectionOrder?: string[];
+  targetRole?: string | null;
   changeNotes?: string[];
   openQuestions?: string[];
 };
@@ -52,6 +54,7 @@ export const normalizeResume = (raw: unknown): ImprovedResume => {
     contact: r.contact ?? [],
     changeNotes: r.changeNotes ?? [],
     openQuestions: r.openQuestions ?? [],
+    ...(r.targetRole !== undefined ? { targetRole: r.targetRole } : {}),
   };
   if (Array.isArray(r.sections)) return { ...base, sections: r.sections };
 

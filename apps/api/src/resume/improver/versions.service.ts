@@ -42,14 +42,17 @@ export class VersionsService {
     const extra = opts.extra?.trim() || undefined;
     const prior = this.versions.latest(resumeId);
     const base = opts.revise && prior ? normalizeResume(prior.improved) : undefined;
+    const role = opts.targetRole?.trim() || undefined;
     const improved = await this.improver.improve({
       original: row.originalText,
-      targetRole: opts.targetRole?.trim() || undefined,
+      targetRole: role,
+      previousRole: base?.targetRole ?? null,
       extra,
       base,
     });
     const known = [row.originalText, extra, base && JSON.stringify(base)].filter(Boolean).join('\n');
-    return toVersion(this.versions.create(resumeId, withFactWarnings(known, improved)), prior);
+    const saved = { ...withFactWarnings(known, improved), targetRole: role ?? null };
+    return toVersion(this.versions.create(resumeId, saved), prior);
   }
 
   latest(resumeId: string): ImprovedVersion {
