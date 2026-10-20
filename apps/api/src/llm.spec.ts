@@ -72,11 +72,7 @@ describe('ResumeImproverService', () => {
     const out = {
       fullName: 'Asha Rao',
       contact: [],
-      summary: 's',
-      experience: [],
-      education: [],
-      skills: [],
-      extras: [],
+      sections: [{ title: 'Profile', paragraph: 's', entries: [], items: [], itemsStyle: 'bullets' }],
       changeNotes: ['tightened bullets'],
       openQuestions: [],
     };

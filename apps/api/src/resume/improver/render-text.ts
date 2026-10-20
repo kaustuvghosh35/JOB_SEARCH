@@ -1,22 +1,20 @@
-import type { ImprovedResume } from '@job-search/shared';
+import { entryHeading, type ImprovedResume } from '@job-search/shared';
 
 export const resumeToText = (r: ImprovedResume): string => {
   const lines: string[] = [];
   if (r.fullName) lines.push(r.fullName);
   if (r.contact.length) lines.push(r.contact.join(' | '));
-  if (r.summary) lines.push('', 'SUMMARY', r.summary);
-  if (r.experience.length) {
-    lines.push('', 'EXPERIENCE');
-    for (const e of r.experience) {
-      lines.push(`${[e.role, e.company].filter(Boolean).join(', ')}${e.period ? ` (${e.period})` : ''}`);
+  for (const s of r.sections) {
+    lines.push('', s.title.toUpperCase());
+    if (s.paragraph) lines.push(s.paragraph);
+    for (const e of s.entries) {
+      lines.push(`${entryHeading(e)}${e.period ? ` (${e.period})` : ''}`);
       e.bullets.forEach((b) => lines.push(`- ${b}`));
     }
+    if (s.items.length) {
+      if (s.itemsStyle === 'inline') lines.push(s.items.join(', '));
+      else s.items.forEach((i) => lines.push(`- ${i}`));
+    }
   }
-  if (r.education.length) {
-    lines.push('', 'EDUCATION');
-    r.education.forEach((e) => lines.push(`${[e.degree, e.school].filter(Boolean).join(', ')}${e.period ? ` (${e.period})` : ''}`));
-  }
-  if (r.skills.length) lines.push('', 'SKILLS', r.skills.join(', '));
-  for (const x of r.extras) lines.push('', x.title.toUpperCase(), ...x.items.map((i) => `- ${i}`));
   return lines.join('\n');
 };

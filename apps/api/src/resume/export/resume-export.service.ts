@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 import PDFDocument from 'pdfkit';
-import type { ImprovedResume } from '@job-search/shared';
+import { entryHeading, type ImprovedResume } from '@job-search/shared';
 
 type Block =
   | { kind: 'name'; text: string }
@@ -15,22 +15,17 @@ const toBlocks = (r: ImprovedResume): Block[] => {
   const b: Block[] = [];
   if (r.fullName) b.push({ kind: 'name', text: r.fullName });
   if (r.contact.length) b.push({ kind: 'line', text: r.contact.join('  |  ') });
-  if (r.summary) b.push({ kind: 'heading', text: 'Summary' }, { kind: 'text', text: r.summary });
-  if (r.experience.length) {
-    b.push({ kind: 'heading', text: 'Experience' });
-    for (const e of r.experience) {
-      b.push({ kind: 'sub', text: [e.role, e.company].filter(Boolean).join(', '), meta: e.period ?? undefined });
+  for (const s of r.sections) {
+    b.push({ kind: 'heading', text: s.title });
+    if (s.paragraph) b.push({ kind: 'text', text: s.paragraph });
+    for (const e of s.entries) {
+      b.push({ kind: 'sub', text: entryHeading(e), meta: e.period ?? undefined });
       e.bullets.forEach((t) => b.push({ kind: 'bullet', text: t }));
     }
-  }
-  if (r.education.length) {
-    b.push({ kind: 'heading', text: 'Education' });
-    r.education.forEach((e) => b.push({ kind: 'sub', text: [e.degree, e.school].filter(Boolean).join(', '), meta: e.period ?? undefined }));
-  }
-  if (r.skills.length) b.push({ kind: 'heading', text: 'Skills' }, { kind: 'text', text: r.skills.join(', ') });
-  for (const x of r.extras) {
-    b.push({ kind: 'heading', text: x.title });
-    x.items.forEach((t) => b.push({ kind: 'bullet', text: t }));
+    if (s.items.length) {
+      if (s.itemsStyle === 'inline') b.push({ kind: 'text', text: s.items.join(', ') });
+      else s.items.forEach((t) => b.push({ kind: 'bullet', text: t }));
+    }
   }
   return b;
 };

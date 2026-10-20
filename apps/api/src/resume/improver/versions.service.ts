@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { ImprovedVersion } from '@job-search/shared';
+import { normalizeResume, type ImprovedVersion } from '@job-search/shared';
 import { ProfileService } from '../../profile/profile.service.js';
 import { ResumeService, type ResumeView } from '../resume.service.js';
 import { resumeToText } from './render-text.js';
@@ -16,8 +16,8 @@ const toVersion = (v: VersionRow, previous: VersionRow | undefined = undefined):
   id: v.id,
   resumeId: v.resumeId,
   createdAt: v.createdAt.toISOString(),
-  resume: v.improved,
-  previous: previous?.improved ?? null,
+  resume: normalizeResume(v.improved),
+  previous: previous ? normalizeResume(previous.improved) : null,
 });
 
 @Injectable()
@@ -33,7 +33,7 @@ export class VersionsService {
   async useLatestForJobs(resumeId: string): Promise<ResumeView> {
     const latest = this.versions.latest(resumeId);
     if (!latest) return this.resumes.get(resumeId);
-    const profile = await this.profiles.extract(resumeToText(latest.improved));
+    const profile = await this.profiles.extract(resumeToText(normalizeResume(latest.improved)));
     return this.resumes.updateProfile(resumeId, profile);
   }
 
@@ -41,7 +41,7 @@ export class VersionsService {
     const row = this.resumes.getRow(resumeId);
     const extra = opts.extra?.trim() || undefined;
     const prior = this.versions.latest(resumeId);
-    const base = opts.revise ? prior?.improved : undefined;
+    const base = opts.revise && prior ? normalizeResume(prior.improved) : undefined;
     const improved = await this.improver.improve({
       original: row.originalText,
       targetRole: opts.targetRole?.trim() || undefined,

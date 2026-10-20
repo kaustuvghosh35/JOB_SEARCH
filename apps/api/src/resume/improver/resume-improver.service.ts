@@ -19,7 +19,8 @@ Rules:
 - Keep contact details exactly as given.
 - Start each bullet with a strong action verb; keep bullets to one or two lines; prefer results over duties.
 - Where a number would strengthen a bullet but the source has none, do NOT make one up: keep the bullet as is and add a question to "openQuestions" (e.g. "How many users did the payments service handle?"). Drop questions the extra details already answer.
-- Use standard section content: summary, experience (newest first), education, skills, extras (projects, certifications, etc.).
+- The resume body is a free list of "sections". You decide which sections exist, their titles, their order and how each is laid out (paragraph, entries with bullets, or a list of items shown as bullets or inline). By default use a sensible layout (profile or summary, experience newest first, education, skills, projects or certifications if present), but the user is tailoring this resume and may ask for anything: add, remove, rename, merge, split or reorder sections, group skills into categories, move education to the top, lead with projects, shorten or expand a section, emphasise some experience over other experience, or aim it at a role. Do what they ask, even if it is unconventional. Only the facts rule limits you.
+- Keep the layout of the current improved version unless the user asks to change it. Mention structural changes in "changeNotes".
 - Weave in role-relevant keywords only if the resume already supports them.
 - "changeNotes": 4-8 short notes on what you changed and why. Only claim a change you actually made; never say you quantified anything unless the numbers were in the source.
 - Where the source is thin, keep the bullet short and put a question in "openQuestions" instead of padding.

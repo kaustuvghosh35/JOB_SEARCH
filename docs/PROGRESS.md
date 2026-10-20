@@ -57,3 +57,5 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 - 2026-10-20 — UI restructure: `/studio` start page and `/studio/[resumeId]` workspace (chat + improved resume side by side, "Search jobs with this resume"). Jobs page is now jobs only. Job search uses the newest improved version via `use-latest`. 47 API tests pass; checked in the browser end to end (workspace → jobs with updated profile).
 
 - 2026-10-21 — Studio start is now a single page (upload or type resume/notes) that auto-improves on arrival in the workspace. Verified in browser with rough notes → workspace → improved resume. 48 API tests pass.
+
+- 2026-10-21 — Free-form resume sections. "Move experience below skills" failed because the format had fixed fields; replaced with a list of sections the AI fully controls (add/rename/reorder/split/merge). Verified live: one chat request renamed Summary to Profile, added Projects first, split Skills into two groups and moved Experience; page and DOCX match. Old versions are converted automatically. 52 API tests pass.

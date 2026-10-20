@@ -16,11 +16,16 @@ const original = 'Asha Rao. Backend Engineer at Acme since 2021. Reduced latency
 const improved = (bullet: string): ImprovedResume => ({
   fullName: 'Asha Rao',
   contact: [],
-  summary: 'Backend engineer.',
-  experience: [{ role: 'Backend Engineer', company: 'Acme', period: '2021 - Present', bullets: [bullet] }],
-  education: [],
-  skills: [],
-  extras: [],
+  sections: [
+    { title: 'Summary', paragraph: 'Backend engineer.', entries: [], items: [], itemsStyle: 'bullets' },
+    {
+      title: 'Experience',
+      paragraph: null,
+      entries: [{ heading: 'Backend Engineer', subheading: 'Acme', period: '2021 - Present', bullets: [bullet] }],
+      items: [],
+      itemsStyle: 'bullets',
+    },
+  ],
   changeNotes: [],
   openQuestions: [],
 });
@@ -51,7 +56,7 @@ describe('VersionsService', () => {
     const v = await svc.improve(row.id);
     expect(v.resume.openQuestions[0]).toMatch(/45/);
     expect((await svc.improve(row.id)).id).not.toBe(v.id);
-    expect(svc.latest(row.id).resume.experience[0].bullets[0]).toBe('Cut latency by 45%.');
+    expect(svc.latest(row.id).resume.sections[1].entries[0].bullets[0]).toBe('Cut latency by 45%.');
   });
 
   it('revises the latest version with extra details and does not flag figures they contain', async () => {
@@ -73,8 +78,8 @@ describe('VersionsService', () => {
     expect(inputs[0]).toMatchObject({ base: undefined, extra: undefined });
     expect(inputs[1]).toMatchObject({ extra: 'It served 500 daily users.', base: { fullName: 'Asha Rao' } });
     expect(v2.resume.openQuestions).toEqual([]);
-    expect(v2.previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
-    expect(svc.latest(row.id).previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
+    expect(v2.previous?.sections[1].entries[0].bullets[0]).toBe('Cut latency by 30%.');
+    expect(svc.latest(row.id).previous?.sections[1].entries[0].bullets[0]).toBe('Cut latency by 30%.');
   });
 
   it('rebuilds the job profile from the newest version', async () => {

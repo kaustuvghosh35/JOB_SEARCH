@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { ImprovedResume, ImprovedVersion } from "@job-search/shared";
+import { entryHeading, type ImprovedResume, type ImprovedVersion } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock, Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,50 +17,35 @@ function ResumeDocument({ resume }: { resume: ImprovedResume }) {
         {resume.fullName && <h3 className="text-lg font-semibold">{resume.fullName}</h3>}
         {resume.contact.length > 0 && <p className="text-muted-foreground">{resume.contact.join(" · ")}</p>}
       </header>
-      {resume.summary && <p>{resume.summary}</p>}
-      {resume.experience.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h4 className="font-semibold uppercase tracking-wide">Experience</h4>
-          {resume.experience.map((e, i) => (
-            <div key={i} className="flex flex-col gap-1">
+      {resume.sections.map((s, i) => (
+        <section key={i} className="flex flex-col gap-2">
+          <h4 className="font-semibold uppercase tracking-wide">{s.title}</h4>
+          {s.paragraph && <p>{s.paragraph}</p>}
+          {s.entries.map((e, j) => (
+            <div key={j} className="flex flex-col gap-1">
               <p className="font-medium">
-                {[e.role, e.company].filter(Boolean).join(", ")}
+                {entryHeading(e)}
                 {e.period && <span className="font-normal text-muted-foreground"> · {e.period}</span>}
               </p>
-              <ul className="list-disc pl-5">
-                {e.bullets.map((b, j) => (
-                  <li key={j}>{b}</li>
-                ))}
-              </ul>
+              {e.bullets.length > 0 && (
+                <ul className="list-disc pl-5">
+                  {e.bullets.map((b, k) => (
+                    <li key={k}>{b}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
-        </section>
-      )}
-      {resume.education.length > 0 && (
-        <section className="flex flex-col gap-1">
-          <h4 className="font-semibold uppercase tracking-wide">Education</h4>
-          {resume.education.map((e, i) => (
-            <p key={i}>
-              {[e.degree, e.school].filter(Boolean).join(", ")}
-              {e.period && <span className="text-muted-foreground"> · {e.period}</span>}
-            </p>
-          ))}
-        </section>
-      )}
-      {resume.skills.length > 0 && (
-        <section className="flex flex-col gap-1">
-          <h4 className="font-semibold uppercase tracking-wide">Skills</h4>
-          <p>{resume.skills.join(", ")}</p>
-        </section>
-      )}
-      {resume.extras.map((x) => (
-        <section key={x.title} className="flex flex-col gap-1">
-          <h4 className="font-semibold uppercase tracking-wide">{x.title}</h4>
-          <ul className="list-disc pl-5">
-            {x.items.map((t, i) => (
-              <li key={i}>{t}</li>
+          {s.items.length > 0 &&
+            (s.itemsStyle === "inline" ? (
+              <p>{s.items.join(", ")}</p>
+            ) : (
+              <ul className="list-disc pl-5">
+                {s.items.map((t, k) => (
+                  <li key={k}>{t}</li>
+                ))}
+              </ul>
             ))}
-          </ul>
         </section>
       ))}
     </article>
