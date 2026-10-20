@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ResumeView } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -70,7 +71,10 @@ export function UploadForm({ destination = (id: string) => `/r/${id}`, onCreated
           dragging ? "border-foreground bg-muted" : "border-border hover:bg-muted"
         } ${busy ? "pointer-events-none opacity-60" : ""}`}
       >
-        <span className="font-medium">{busy ? "Reading your resume..." : "Drop your resume here"}</span>
+        <span className="flex items-center gap-2 font-medium">
+          {busy && <Spinner />}
+          {busy ? "Reading your resume, one moment..." : "Drop your resume here"}
+        </span>
         <span className="text-sm text-muted-foreground">PDF or DOCX, up to 5 MB</span>
         <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => onFile(e.target.files?.[0])} />
       </div>
@@ -113,7 +117,8 @@ export function UploadForm({ destination = (id: string) => `/r/${id}`, onCreated
             disabled={busy || text.trim().length < MIN_TEXT}
             onClick={() => submit({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })}
           >
-            {busy ? "Reading..." : inlineText ? "Continue" : "Use this text"}
+            {busy && <Spinner />}
+            {busy ? "Reading your resume..." : inlineText ? "Continue" : "Use this text"}
           </Button>
         </div>
       )}

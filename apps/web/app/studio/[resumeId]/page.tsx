@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ChatPanel } from "@/features/chat/chat-panel";
 import { VersionPanel } from "@/features/studio/version-panel";
 import { api } from "@/lib/api";
@@ -15,6 +16,7 @@ export default function StudioWorkspace() {
   const [resume, setResume] = useState<ResumeView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [versionTick, setVersionTick] = useState(0);
+  const [applying, setApplying] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
@@ -58,6 +60,7 @@ export default function StudioWorkspace() {
             </div>
             <div className="flex flex-col items-end gap-1">
               <Button size="lg" onClick={searchJobs} disabled={searching}>
+                {searching && <Spinner />}
                 {searching ? "Preparing search..." : "Search jobs with this resume"}
               </Button>
               {searchError && (
@@ -77,10 +80,11 @@ export default function StudioWorkspace() {
                 storageKey={`chat:${resume.id}`}
                 resumeId={resume.id}
                 onApplied={() => setVersionTick((n) => n + 1)}
+                onApplying={setApplying}
                 placeholder="Ask for changes, e.g. make my summary shorter, or tailor this for a backend role."
               />
             </section>
-            <VersionPanel key={versionTick} resumeId={resume.id} defaultRole={resume.profile.headline} />
+            <VersionPanel key={versionTick} resumeId={resume.id} defaultRole={resume.profile.headline} externalBusy={applying} />
           </div>
         </>
       )}

@@ -37,6 +37,7 @@ function ChatInner({
   storageKey,
   placeholder,
   onApplied,
+  onApplying,
   createdHref,
 }: {
   sessionId: string;
@@ -45,6 +46,7 @@ function ChatInner({
   storageKey: string;
   placeholder: string;
   onApplied?: () => void;
+  onApplying?: (busy: boolean) => void;
   createdHref?: (resumeId: string) => string;
 }) {
   const [applying, setApplying] = useState(false);
@@ -91,6 +93,7 @@ function ChatInner({
 
   async function applyChat() {
     setApplying(true);
+    onApplying?.(true);
     setApplyError(null);
     try {
       await api(`/chat/${sessionId}/apply`, { method: "POST" });
@@ -99,6 +102,7 @@ function ChatInner({
       setApplyError(e instanceof Error ? e.message : "Could not apply the chat.");
     } finally {
       setApplying(false);
+      onApplying?.(false);
     }
   }
 
@@ -185,12 +189,14 @@ export function ChatPanel({
   resumeId,
   placeholder,
   onApplied,
+  onApplying,
   createdHref,
 }: {
   storageKey: string;
   resumeId: string | null;
   placeholder: string;
   onApplied?: () => void;
+  onApplying?: (busy: boolean) => void;
   createdHref?: (resumeId: string) => string;
 }) {
   const sessionId = useSessionId(storageKey);
@@ -214,6 +220,7 @@ export function ChatPanel({
       storageKey={storageKey}
       placeholder={placeholder}
       onApplied={onApplied}
+      onApplying={onApplying}
       createdHref={createdHref}
     />
   );

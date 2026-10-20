@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ImprovedResume, ImprovedVersion } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
+import { LoadingBlock, Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_URL, api } from "@/lib/api";
 import { consumeAutoImprove } from "./auto-improve";
@@ -68,7 +69,16 @@ function ResumeDocument({ resume }: { resume: ImprovedResume }) {
 
 const frame = "max-h-[62vh] overflow-auto rounded-lg border border-border p-4";
 
-export function VersionPanel({ resumeId, defaultRole }: { resumeId: string; defaultRole: string }) {
+export function VersionPanel({
+  resumeId,
+  defaultRole,
+  externalBusy = false,
+}: {
+  resumeId: string;
+  defaultRole: string;
+  externalBusy?: boolean;
+}) {
+  const [ready, setReady] = useState(false);
   const [original, setOriginal] = useState<string | null>(null);
   const [version, setVersion] = useState<ImprovedVersion | null>(null);
   const [targetRole, setTargetRole] = useState(defaultRole);
@@ -107,7 +117,9 @@ export function VersionPanel({ resumeId, defaultRole }: { resumeId: string; defa
   }, [resumeId, targetRole, extra, revise, version]);
 
   useEffect(() => {
-    if (!loading && !version && consumeAutoImprove(resumeId)) void improve();
+    if (loading) return;
+    if (!version && consumeAutoImprove(resumeId)) void improve();
+    setReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
@@ -126,7 +138,8 @@ export function VersionPanel({ resumeId, defaultRole }: { resumeId: string; defa
       >
         <div className="flex flex-wrap items-center gap-2">
           <input aria-label="Target role" className={`${field} min-w-0 flex-1`} value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="Target role (optional)" />
-          <Button type="submit" disabled={busy || loading}>
+          <Button type="submit" disabled={busy || loading || externalBusy}>
+            {busy && <Spinner />}
             {busy ? "Improving..." : version ? "Improve again" : "Improve my resume"}
           </Button>
         </div>
@@ -156,15 +169,22 @@ export function VersionPanel({ resumeId, defaultRole }: { resumeId: string; defa
           {error}
         </p>
       )}
-      {(busy || loading) && <div className="h-64 animate-pulse rounded-lg bg-muted" aria-label="Loading" />}
+      {(loading || !ready) && !busy && <LoadingBlock title="Loading your resume..." />}
+      {busy && (
+        <LoadingBlock
+          title={version ? "Updating your resume with AI..." : "Improving your resume with AI..."}
+          hint="This usually takes 10 to 20 seconds."
+        />
+      )}
+      {externalBusy && !busy && <LoadingBlock title="Applying your chat changes..." hint="This usually takes 10 to 20 seconds." />}
 
-      {!busy && !loading && !version && (
+      {ready && !busy && !externalBusy && !loading && !version && (
         <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
           No improved version yet. Press Improve my resume, or chat on the left and apply the changes.
         </p>
       )}
 
-      {version && !busy && (
+      {version && !busy && !externalBusy && (
         <>
           <Tabs defaultValue="after">
             <div className="flex flex-wrap items-center justify-between gap-2">
