@@ -5,6 +5,8 @@ import { resumes } from '../../db/schema/index.js';
 import { ResumeExportService } from '../export/resume-export.service.js';
 import type { ResumeService } from '../resume.service.js';
 import { unsupportedNumbers } from './fact-check.js';
+import type { ProfileService } from '../../profile/profile.service.js';
+import { resumeToText } from './render-text.js';
 import type { ResumeImproverService } from './resume-improver.service.js';
 import { VersionRepository } from './version.repository.js';
 import { VersionsService } from './versions.service.js';
@@ -39,6 +41,7 @@ describe('VersionsService', () => {
       { improve: async () => out } as unknown as ResumeImproverService,
       new VersionRepository(db),
       new ResumeExportService(),
+      { extract: async () => ({ headline: 'Backend Engineer' }) } as unknown as ProfileService,
     );
     return { svc, row };
   };
@@ -61,6 +64,7 @@ describe('VersionsService', () => {
       { improve: async (i: unknown) => (inputs.push(i), outputs.shift()) } as unknown as ResumeImproverService,
       new VersionRepository(db),
       new ResumeExportService(),
+      { extract: async () => ({ headline: 'Backend Engineer' }) } as unknown as ProfileService,
     );
 
     await svc.improve(row.id);
@@ -71,6 +75,30 @@ describe('VersionsService', () => {
     expect(v2.resume.openQuestions).toEqual([]);
     expect(v2.previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
     expect(svc.latest(row.id).previous?.experience[0].bullets[0]).toBe('Cut latency by 30%.');
+  });
+
+  it('rebuilds the job profile from the newest version', async () => {
+    const db = openDb(':memory:');
+    const row = db.insert(resumes).values({ originalText: original, expiresAt: new Date(Date.now() + 1e6) }).returning().get();
+    const seen: string[] = [];
+    const saved: unknown[] = [];
+    const svc = new VersionsService(
+      { getRow: () => row, get: () => ({ id: row.id, profile: 'old' }), updateProfile: (_id: string, p: unknown) => (saved.push(p), { id: row.id, profile: p }) } as unknown as ResumeService,
+      { improve: async () => improved('Led a team of 4.') } as unknown as ResumeImproverService,
+      new VersionRepository(db),
+      new ResumeExportService(),
+      { extract: async (t: string) => (seen.push(t), { headline: 'Team Lead' }) } as unknown as ProfileService,
+    );
+
+    expect(await svc.useLatestForJobs(row.id)).toMatchObject({ profile: 'old' });
+    await svc.improve(row.id);
+    expect(await svc.useLatestForJobs(row.id)).toMatchObject({ profile: { headline: 'Team Lead' } });
+    expect(seen[0]).toContain('Led a team of 4.');
+    expect(saved).toHaveLength(1);
+  });
+
+  it('renders a resume to plain text', () => {
+    expect(resumeToText(improved('Led a team of 4.'))).toContain('- Led a team of 4.');
   });
 
   it('has no previous version on the first improve', async () => {

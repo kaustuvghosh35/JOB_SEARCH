@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT = ".pdf,.docx";
 
-export function UploadForm() {
+export function UploadForm({ destination = (id: string) => `/r/${id}` }: { destination?: (id: string) => string }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -23,7 +23,7 @@ export function UploadForm() {
     setError(null);
     try {
       const resume = await api<ResumeView>(init.method === "POST" && init.body instanceof FormData ? "/resumes" : "/resumes/text", init);
-      router.push(`/r/${resume.id}`);
+      router.push(destination(resume.id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
       setBusy(false);

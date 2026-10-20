@@ -67,6 +67,11 @@ export class ResumeController {
     return this.versions.improve(id, parsed.data);
   }
 
+  @Post(':id/use-latest')
+  useLatest(@Param('id', ParseUUIDPipe) id: string) {
+    return this.versions.useLatestForJobs(id);
+  }
+
   @Get(':id/improved')
   improved(@Param('id', ParseUUIDPipe) id: string) {
     return this.versions.latest(id);

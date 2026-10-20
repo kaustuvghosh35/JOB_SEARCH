@@ -22,6 +22,10 @@ export class ResumeRepository {
     return this.db.insert(resumes).values(data).returning().get();
   }
 
+  updateProfile(id: string, profile: Profile): void {
+    this.db.update(resumes).set({ profile }).where(eq(resumes.id, id)).run();
+  }
+
   findById(id: string): ResumeRow | undefined {
     return this.db.select().from(resumes).where(eq(resumes.id, id)).get();
   }

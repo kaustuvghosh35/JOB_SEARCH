@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import { UploadForm } from "@/features/upload/upload-form";
 
 export default function Home() {
@@ -11,12 +12,12 @@ export default function Home() {
         </p>
       </header>
       <UploadForm />
-      <p className="text-sm text-muted-foreground">
-        No resume yet?{" "}
-        <Link href="/chat" className="font-medium text-foreground underline underline-offset-4">
-          Write it with AI
+      <div className="flex flex-col items-start gap-2">
+        <Link href="/studio" className={buttonVariants({ variant: "outline", size: "lg" })}>
+          Improve or write a resume
         </Link>
-      </p>
+        <p className="text-sm text-muted-foreground">Edit with AI chat, download a clean DOCX or PDF, then search jobs.</p>
+      </div>
     </main>
   );
 }

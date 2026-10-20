@@ -1,6 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ImprovedVersion } from '@job-search/shared';
-import { ResumeService } from '../resume.service.js';
+import { ProfileService } from '../../profile/profile.service.js';
+import { ResumeService, type ResumeView } from '../resume.service.js';
+import { resumeToText } from './render-text.js';
 import { ResumeExportService } from '../export/resume-export.service.js';
 import { withFactWarnings } from './fact-check.js';
 import { ResumeImproverService } from './resume-improver.service.js';
@@ -25,7 +27,15 @@ export class VersionsService {
     @Inject(ResumeImproverService) private readonly improver: ResumeImproverService,
     @Inject(VersionRepository) private readonly versions: VersionRepository,
     @Inject(ResumeExportService) private readonly exporter: ResumeExportService,
+    @Inject(ProfileService) private readonly profiles: ProfileService,
   ) {}
+
+  async useLatestForJobs(resumeId: string): Promise<ResumeView> {
+    const latest = this.versions.latest(resumeId);
+    if (!latest) return this.resumes.get(resumeId);
+    const profile = await this.profiles.extract(resumeToText(latest.improved));
+    return this.resumes.updateProfile(resumeId, profile);
+  }
 
   async improve(resumeId: string, opts: ImproveOptions = {}): Promise<ImprovedVersion> {
     const row = this.resumes.getRow(resumeId);

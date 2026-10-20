@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import type { Profile } from '@job-search/shared';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { ProfileService } from '../profile/profile.service.js';
@@ -47,6 +48,12 @@ export class ResumeService {
 
   get(id: string): ResumeView {
     return toView(this.getRow(id));
+  }
+
+  updateProfile(id: string, profile: Profile): ResumeView {
+    this.getRow(id);
+    this.repo.updateProfile(id, profile);
+    return this.get(id);
   }
 
   getRow(id: string): ResumeRow {

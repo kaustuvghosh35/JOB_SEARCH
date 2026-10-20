@@ -37,6 +37,7 @@ function ChatInner({
   storageKey,
   placeholder,
   onApplied,
+  createdHref,
 }: {
   sessionId: string;
   resumeId: string | null;
@@ -44,6 +45,7 @@ function ChatInner({
   storageKey: string;
   placeholder: string;
   onApplied?: () => void;
+  createdHref?: (resumeId: string) => string;
 }) {
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ function ChatInner({
       try {
         localStorage.removeItem(storageKey);
       } catch {}
-      router.push(`/r/${resume.id}`);
+      router.push(createdHref ? createdHref(resume.id) : `/r/${resume.id}`);
     } catch (e) {
       setCreateError(e instanceof Error ? e.message : "Could not create the resume.");
       setCreating(false);
@@ -140,7 +142,7 @@ function ChatInner({
           onChange={(e) => setInput(e.target.value)}
           disabled={busy}
           aria-label="Message"
-          placeholder="Type your answer"
+          placeholder="Type a message"
           className="h-10 flex-1 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-2"
         />
         <Button type="submit" disabled={busy || !input.trim()}>
@@ -183,11 +185,13 @@ export function ChatPanel({
   resumeId,
   placeholder,
   onApplied,
+  createdHref,
 }: {
   storageKey: string;
   resumeId: string | null;
   placeholder: string;
   onApplied?: () => void;
+  createdHref?: (resumeId: string) => string;
 }) {
   const sessionId = useSessionId(storageKey);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
@@ -210,6 +214,7 @@ export function ChatPanel({
       storageKey={storageKey}
       placeholder={placeholder}
       onApplied={onApplied}
+      createdHref={createdHref}
     />
   );
 }

@@ -53,3 +53,5 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 - [ ] TinyFish Search quality for LinkedIn/Naukri job queries and `site:` operator support (Phase 0)
 - [ ] AI SDK version installed → correct stream-pipe helper name (Phase 0)
 - [ ] Hosting choice for sharing with friends (Phase 6)
+
+- 2026-10-20 — UI restructure: `/studio` start page and `/studio/[resumeId]` workspace (chat + improved resume side by side, "Search jobs with this resume"). Jobs page is now jobs only. Job search uses the newest improved version via `use-latest`. 47 API tests pass; checked in the browser end to end (workspace → jobs with updated profile).

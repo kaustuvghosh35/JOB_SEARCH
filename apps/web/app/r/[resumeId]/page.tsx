@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChatPanel } from "@/features/chat/chat-panel";
 import { JobsPanel } from "@/features/jobs/jobs-panel";
-import { ImprovedPanel } from "@/features/resume/improved-panel";
 import { ProfileSummary } from "@/features/resume/profile-summary";
 import { api } from "@/lib/api";
 
@@ -15,8 +12,6 @@ export default function ResumePage() {
   const { resumeId } = useParams<{ resumeId: string }>();
   const [resume, setResume] = useState<ResumeView | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<string>("jobs");
-  const [versionTick, setVersionTick] = useState(0);
 
   useEffect(() => {
     api<ResumeView>(`/resumes/${resumeId}`)
@@ -26,9 +21,14 @@ export default function ResumePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[960px] flex-1 flex-col gap-10 px-4 py-16">
-      <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-        ← New resume
-      </Link>
+      <nav className="flex items-center justify-between text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-foreground">
+          ← New resume
+        </Link>
+        <Link href={`/studio/${resumeId}`} className="font-medium text-foreground underline underline-offset-4">
+          Improve or edit this resume
+        </Link>
+      </nav>
       {error && (
         <p role="alert" className="font-medium">
           {error}
@@ -40,34 +40,11 @@ export default function ResumePage() {
           <div className="max-w-[720px]">
             <ProfileSummary profile={resume.profile} expiresAt={resume.expiresAt} />
           </div>
-          <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
-            <TabsList variant="line">
-              <TabsTrigger value="jobs">Jobs</TabsTrigger>
-              <TabsTrigger value="improved">Improved resume</TabsTrigger>
-              <TabsTrigger value="chat">Chat</TabsTrigger>
-            </TabsList>
-            <TabsContent value="jobs" className="pt-6">
-              <JobsPanel
-                resumeId={resume.id}
-                defaultRole={resume.profile.headline}
-                defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
-              />
-            </TabsContent>
-            <TabsContent value="improved" className="pt-6">
-              <ImprovedPanel key={versionTick} resumeId={resume.id} defaultRole={resume.profile.headline} />
-            </TabsContent>
-            <TabsContent value="chat" className="max-w-[720px] pt-6">
-              <ChatPanel
-                storageKey={`chat:${resume.id}`}
-                resumeId={resume.id}
-                onApplied={() => {
-                  setVersionTick((n) => n + 1);
-                  setTab("improved");
-                }}
-                placeholder="Ask for changes, e.g. make my summary shorter, or tailor this for a backend role."
-              />
-            </TabsContent>
-          </Tabs>
+          <JobsPanel
+            resumeId={resume.id}
+            defaultRole={resume.profile.headline}
+            defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
+          />
         </>
       )}
     </main>
