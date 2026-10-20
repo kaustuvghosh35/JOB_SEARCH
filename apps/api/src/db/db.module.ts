@@ -14,9 +14,8 @@ export type Db = BetterSQLite3Database<typeof schema>;
 
 const migrationsFolder = resolve(dirname(fileURLToPath(import.meta.url)), '../../drizzle');
 
-const createDb = (env: Env): Db => {
-  const path = resolve(env.DATABASE_PATH);
-  mkdirSync(dirname(path), { recursive: true });
+export const openDb = (path: string): Db => {
+  if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const sqlite = new Database(path);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
@@ -24,6 +23,8 @@ const createDb = (env: Env): Db => {
   migrate(db, { migrationsFolder });
   return db;
 };
+
+const createDb = (env: Env): Db => openDb(resolve(env.DATABASE_PATH));
 
 @Global()
 @Module({

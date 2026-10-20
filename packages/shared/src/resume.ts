@@ -20,3 +20,11 @@ export const improvedResumeSchema = z.object({
 });
 
 export type ImprovedResume = z.infer<typeof improvedResumeSchema>;
+
+export type ResumeView = {
+  id: string;
+  filename: string | null;
+  profile: import('./profile.js').Profile | null;
+  createdAt: string;
+  expiresAt: string;
+};
