@@ -1,22 +1,23 @@
 # Phase 6 — Polish + share
 
-**Status:** ⬜ not started · **Est.:** 1 day · **Depends on:** Phases 3–5
+**Status:** 🟡 partly done · **Est.:** 1 day · **Depends on:** Phases 3–5
 
 ## Goal
 Friends can use it end-to-end without hand-holding.
 
 ## Tasks
-- [ ] Visual polish pass: spacing, type scale, hairline borders, mobile widths, focus states, AA+ contrast
-- [ ] Empty/error/loading states everywhere (skeletons, no spinner spam)
-- [ ] Optional dark mode as exact inversion (only if cheap)
-- [ ] README: setup, env vars, how to get TinyFish + Anthropic keys, how to run
-- [ ] Optional `ACCESS_CODE` env guard if publicly hosted
-- [ ] Pick hosting (e.g. Vercel for web + Railway/Fly for API with a volume for SQLite) or run locally with a tunnel; deploy
+- [x] Visual check in the browser (desktop + 375px mobile): home, results, improved before/after, chat. Strict B&W, Inter, hairline borders
+- [x] Skeleton loaders, empty and error states (jobs, improved, chat, upload)
+- [x] README: run steps, layout, migrations
+- [x] `scripts/seed-demo.mjs` to preview the UI without API keys; `.claude/launch.json` for the dev servers
+- [ ] Optional dark mode (skipped: light only, per decision 12)
+- [ ] `ACCESS_CODE` guard (env var exists, not enforced yet; only needed if hosted publicly)
+- [ ] Pick hosting and deploy (default: run locally; API needs a persistent volume for SQLite)
 - [ ] Short note for friends: resume goes to Anthropic; data auto-expires after TTL
-- [ ] Final end-to-end run with a friend's resume
+- [ ] Final end-to-end run with a real resume and both API keys
 
 ## Exit criteria
-- Upload → jobs → Apply works; improved resume downloads; chat resumes after refresh — on the shared deployment
+- Upload → jobs → Apply works; improved resume downloads; chat resumes after refresh — on the shared deployment (blocked on keys + hosting choice)
 
 ## Notes
-_(fill in)_
+- First tab click on the results page after load sometimes needed a second click in the preview browser; not reproduced as a bug, recheck with a real user session.
