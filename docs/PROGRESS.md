@@ -6,10 +6,10 @@ _Last updated: 2026-10-20 — planning complete, no code written yet._
 
 | # | Phase | Est. | Status | Exit criteria (short) | Details |
 |---|---|---|---|---|---|
-| 0 | Spike: de-risk job source | ½ d | 🟡 | ≥60% of TinyFish results are real, current job pages; Nest↔AI SDK streaming works | [phase-0](phases/phase-0-spike.md) |
+| 0 | Spike: de-risk job source | ½ d | ✅ | ≥60% of TinyFish results are real, current job pages; Nest↔AI SDK streaming works | [phase-0](phases/phase-0-spike.md) |
 | 1 | Foundations | 1 d | ✅ | App boots, DB migrates, B&W theme + Inter in place | [phase-1](phases/phase-1-foundations.md) |
 | 2 | Resume in | 1–2 d | 🟡 | 3+ real resumes parse to a correct profile | [phase-2](phases/phase-2-resume-in.md) |
-| 3 | Jobs | 1–2 d | 🟡 | Real resume → relevant jobs; Apply links open right postings | [phase-3](phases/phase-3-jobs.md) |
+| 3 | Jobs | 1–2 d | ✅ | Real resume → relevant jobs; Apply links open right postings | [phase-3](phases/phase-3-jobs.md) |
 | 4 | Improve + export | 1–2 d | 🟡 | DOCX/PDF opens cleanly; no invented facts | [phase-4](phases/phase-4-improve-export.md) |
 | 5 | Chatbot | 1–2 d | 🟡 | Refresh restores conversation; AI keeps context | [phase-5](phases/phase-5-chatbot.md) |
 | 6 | Polish + share | 1 d | 🟡 | Friends can use it end-to-end | [phase-6](phases/phase-6-polish-share.md) |
@@ -36,11 +36,12 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 
 - 2026-10-20 — Phase 6 partly done: browser check passed (desktop + mobile), seeded demo shows jobs error state, before/after, DOCX/PDF downloads. All code phases built; 31 API tests pass. Remaining = things that need you: API keys, live checks, hosting choice.
 
+- 2026-10-20 — TinyFish key added to `.env` (gitignored). Spike: 100% of hits are real job pages. Parser rewritten from real titles (38 API tests pass). Live jobs endpoint + UI verified. App running on :3000 (web) and :4000 (api).
+
 ## Needs from you (to finish)
-1. `ANTHROPIC_API_KEY` and `TINYFISH_API_KEY` in `.env`
-2. Run `node scripts/tinyfish-spike.mjs`, then fix `SITE_SCOPES` / title patterns if the hit rate is under 60%
-3. Try 3 real resumes + one chat interview, check for invented facts
-4. Hosting: run locally, or deploy (API needs a volume for SQLite)
+1. `ANTHROPIC_API_KEY` in `.env` (resume parsing, improve, chat all need it; restart the API after)
+2. Try 3 real resumes + one chat interview, check for invented facts
+3. Hosting: run locally, or deploy (API needs a volume for SQLite)
 
 ## Open questions / risks
 - [ ] TinyFish Search quality for LinkedIn/Naukri job queries and `site:` operator support (Phase 0)

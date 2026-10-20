@@ -20,25 +20,42 @@ export const detectSource = (rawUrl: string): Source | null => {
   return null;
 };
 
-const stripSuffix = (title: string) => clean(title.replace(/\s*[|–—-]\s*(LinkedIn|Naukri\.com|Naukri)\s*$/i, ''));
+const stripNoise = (title: string) =>
+  clean(
+    title
+      .replace(/\s*(\.{3}|…)\s*$/, '')
+      .replace(/\s*[|–—-]\s*(LinkedIn|Naukri\.com|Naukri)\s*$/i, '')
+      .replace(/\s*[-|–—]\s*Jobs?\s*$/i, '')
+      .replace(/\s+jobs?\s*$/i, ''),
+  );
+
+const SEP = /\s+[-–—]\s+/;
 
 const parseLinkedin = (raw: string): Parsed => {
-  const t = stripSuffix(raw);
+  const t = stripNoise(raw);
   const hiring = t.match(/^(.+?)\s+hiring\s+(.+?)(?:\s+in\s+(.+))?$/i);
   if (hiring) return { company: clean(hiring[1]), title: clean(hiring[2]), location: hiring[3] ? clean(hiring[3]) : null };
-  const parts = t.split(/\s+[-–—]\s+/).map(clean);
-  if (parts.length >= 3) return { title: parts[0], company: parts[1], location: parts[2] };
-  if (parts.length === 2) return { title: parts[0], company: parts[1], location: null };
+
+  const at = t.match(/^(.+)\s+at\s+(.+?)(?:\s+[–—-]\s+(.+))?$/i);
+  if (at) return { title: clean(at[1]), company: clean(at[2]), location: at[3] ? clean(at[3]) : null };
+
   return { title: t, company: null, location: null };
 };
 
+const companyFromLinkedinSlug = (url: URL): string | null => {
+  const slug = url.pathname.split('/jobs/view/')[1]?.replace(/\/$/, '');
+  const m = slug && decodeURIComponent(slug).match(/-at-(.+?)-\d{6,}$/);
+  if (!m) return null;
+  return m[1].split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
+
 const parseNaukri = (raw: string): Parsed => {
-  const t = stripSuffix(raw);
-  const at = t.match(/^(.+?)\s+Job(?:s)?\s+in\s+(.+?)\s+at\s+(.+)$/i);
-  if (at) return { title: clean(at[1]), location: clean(at[2]), company: clean(at[3]) };
-  const parts = t.split(/\s+[-–—]\s+/).map(clean);
-  if (parts.length >= 3) return { title: parts[0], company: parts[1], location: parts[2] };
-  if (parts.length === 2) return { title: parts[0], company: parts[1], location: null };
+  const t = stripNoise(raw).replace(/\s*[-–—]\s*\d+\+?(?:\s*to\s*\d+)?(?:\s*years?\b.*)?$/i, '');
+  const parts = t.split(SEP).map(clean).filter(Boolean);
+  if (parts.length >= 3) {
+    return { title: parts.slice(0, -2).join(' - '), location: parts.at(-2)!, company: parts.at(-1)! };
+  }
+  if (parts.length === 2) return { title: parts[0], location: parts[1], company: null };
   return { title: t, company: null, location: null };
 };
 
@@ -57,10 +74,21 @@ export const parseHit = (hit: SearchHit): ParsedHit | null => {
   const parsed = source === 'linkedin' ? parseLinkedin(hit.title) : parseNaukri(hit.title);
   if (!parsed.title) return null;
   const applyUrl = canonicalUrl(hit.url);
+  const slugCompany = source === 'linkedin' && !parsed.company ? companyFromLinkedinSlug(new URL(hit.url)) : null;
+  let { title, company } = parsed;
+  if (slugCompany) {
+    company = slugCompany;
+    const tail = title.match(/^(.+?)\s+[-–—]\s+([^-–—]+)$/);
+    const flat = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (tail && flat(tail[2]) === flat(slugCompany)) {
+      title = clean(tail[1]);
+      company = clean(tail[2]);
+    }
+  }
   return {
     id: createHash('sha1').update(applyUrl).digest('hex').slice(0, 16),
-    title: parsed.title,
-    company: parsed.company,
+    title,
+    company,
     location: parsed.location,
     snippet: clean(hit.snippet).slice(0, 280),
     source,

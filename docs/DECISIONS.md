@@ -20,4 +20,7 @@ Decisions made autonomously (per user instruction: decide, don't ask, log here).
 | 15 | 2026-10-20 | Chat `sessionId` is generated client-side (UUID in localStorage) and the server creates the session on first message | Simplest fit for useChat's `id` and no-login model | Yes |
 | 16 | 2026-10-20 | Added number "fact check" on improved resumes: figures not in the original are listed under "Check these before you send it" | Cheap guard against fabricated metrics beyond prompt rules | Yes |
 | 17 | 2026-10-20 | Job pipeline uses synthetic fixtures for title patterns until a TinyFish key allows real ones | No key available; Phase 0 spike still pending | Yes |
+| 18 | 2026-10-20 | TinyFish key stored in root `.env` only (gitignored, verified with `git check-ignore`); never written to docs, code or commits | User supplied it for this app | Yes |
+| 19 | 2026-10-20 | Hit parser rewritten from real TinyFish titles; LinkedIn company falls back to the URL slug; dashes in LinkedIn titles are kept (not split) | Real titles differ from the guessed formats | Yes |
+| 20 | 2026-10-20 | Kept the two-query design (one LinkedIn, one Naukri), no Fetch enrichment | 100% job-page hit rate and useful snippets make Fetch unnecessary | Yes |
 | 13 | 2026-10-20 | Config/DB/LLM are `@Global()` Nest modules injected via symbols `ENV`, `DB`, `LLM_MODEL` | Keeps feature modules free of import wiring | Yes |

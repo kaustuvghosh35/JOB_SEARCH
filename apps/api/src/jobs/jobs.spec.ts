@@ -4,6 +4,7 @@ import { loadEnv } from '../config/env.js';
 import { openDb } from '../db/db.module.js';
 import type { ResumeService } from '../resume/resume.service.js';
 import { JobCacheRepository } from './cache.repository.js';
+import fixtures from './fixtures/tinyfish-hits.json' with { type: 'json' };
 import { dedupe, detectSource, parseHit } from './hit-parser.js';
 import { JobProviderError, type JobProvider, type SearchHit } from './providers/job-provider.js';
 import { buildQueries } from './query-builder.js';
@@ -42,14 +43,49 @@ describe('parseHit', () => {
     expect(j.applyUrl).not.toContain('trk=');
   });
 
-  it('parses dash-separated titles', () => {
-    const j = parseHit(hit('Backend Engineer - Acme - Bengaluru | LinkedIn', LI))!;
-    expect(j).toMatchObject({ title: 'Backend Engineer', company: 'Acme', location: 'Bengaluru' });
-  });
+  describe('real TinyFish results', () => {
+    const byTitle = (start: string) => {
+      const h = (fixtures as SearchHit[]).find((x) => x.title.startsWith(start));
+      return parseHit(h!)!;
+    };
 
-  it('parses Naukri "Title Job in Location at Company"', () => {
-    const j = parseHit(hit('Backend Engineer Job in Bengaluru at Acme - Naukri.com', NK))!;
-    expect(j).toMatchObject({ title: 'Backend Engineer', location: 'Bengaluru', company: 'Acme', source: 'naukri' });
+    it('LinkedIn "Title at Company"', () => {
+      expect(byTitle('Principal Engineer')).toMatchObject({ company: 'Applicantz', source: 'linkedin' });
+    });
+
+    it('LinkedIn "Company hiring Title in Location"', () => {
+      expect(byTitle('Windranger Labs hiring')).toMatchObject({ company: 'Windranger Labs', title: 'Node.js Engineer', location: 'APAC' });
+    });
+
+    it('LinkedIn "Title at Company — Location"', () => {
+      expect(byTitle('Over-the-Road')).toMatchObject({ title: 'Over-the-Road Visibility', company: 'Jobgether', location: 'India' });
+    });
+
+    it('LinkedIn "Title - Company" resolved with the URL slug', () => {
+      expect(byTitle('React JS, CSS')).toMatchObject({ title: 'React JS, CSS, JavaScript', company: 'CALTEK Solutions Inc.' });
+    });
+
+    it('LinkedIn keeps dashes inside titles and takes company from the slug', () => {
+      const j = byTitle('Senior Backend Engineer - Node.js');
+      expect(j.title).toBe('Senior Backend Engineer - Node.js & AWS (Remote)');
+      expect(j.company).toBe('Jobs Ai');
+    });
+
+    it('Naukri "Title - Location - Company - N to M years"', () => {
+      expect(byTitle('Data Analyst - Pune - Vishay')).toMatchObject({ title: 'Data Analyst', location: 'Pune', company: 'Vishay', source: 'naukri' });
+    });
+
+    it('Naukri with truncated experience tail', () => {
+      expect(byTitle('Aws Devops')).toMatchObject({ title: 'Aws Devops Engineer', location: 'Delhi / NCR', company: 'Vinayak Solutions' });
+    });
+
+    it('Naukri keeps a dash inside the title when company and location follow', () => {
+      expect(byTitle('Lead Backend Engineer-')).toMatchObject({ title: 'Lead Backend Engineer- NodeJS', location: 'Bengaluru', company: 'AVE-Promagne' });
+    });
+
+    it('Naukri "Title - Location"', () => {
+      expect(byTitle('Backend Developer (Node.js')).toMatchObject({ title: 'Backend Developer (Node.js/PostgreSQL)', location: 'Bengaluru', company: null });
+    });
   });
 
   it('keeps the raw title when the pattern is unknown', () => {
@@ -108,7 +144,7 @@ describe('JobsService', () => {
         calls++;
         return query.includes('linkedin')
           ? [hit('Acme hiring Backend Engineer in Pune | LinkedIn', LI, 'TypeScript NestJS')]
-          : [hit('Backend Engineer Job in Pune at Acme - Naukri.com', NK, 'PostgreSQL')];
+          : [hit('Backend Engineer - Pune - Acme - 3 to 5 years of experience', NK, 'PostgreSQL')];
       },
     };
     const svc = make(provider);
