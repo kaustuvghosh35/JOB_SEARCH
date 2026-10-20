@@ -1,21 +1,25 @@
 # Phase 4 — Improve + export
 
-**Status:** ⬜ not started · **Est.:** 1–2 days · **Depends on:** Phase 2 (independent of Phase 3)
+**Status:** 🟡 code done, live LLM check pending (needs `ANTHROPIC_API_KEY`) · **Est.:** 1–2 days · **Depends on:** Phase 2
 
 ## Goal
 Return an improved resume with before/after view and DOCX/PDF download.
 
 ## Tasks
-- [ ] Shared Zod `ImprovedResume` schema (sections, bullets, change notes, open questions)
-- [ ] `resume-improver.service.ts`: `generateObject` with prompt rules — stronger action verbs, quantified bullets, ATS keywords, consistent formatting, **never invent facts**; flag gaps as questions
-- [ ] `POST /resumes/:id/improve` → saves `resume_versions` row; list versions
-- [ ] `resume-export.service.ts`: DOCX via `docx`, PDF via `pdfkit`; `GET /resumes/:id/export?format=docx|pdf` (latest or `versionId`)
-- [ ] Web: "Improved resume" tab — before/after diff, change notes, open questions, download buttons, B&W clean typography
-- [ ] Prompt evals: 3–5 sample resumes checked for fabricated employers/metrics
+- [x] Shared `ImprovedResume` schema + `ImprovedVersion` type
+- [x] `improver/resume-improver.service.ts`: `generateText` + `Output.object`, prompt forbids invented facts, asks questions instead of guessing numbers, optional target role
+- [x] `improver/fact-check.ts`: any number in the output that is absent from the original is added to `openQuestions` as "verify" (cheap guard against fabricated metrics)
+- [x] `POST /resumes/:id/improve` (saves `resume_versions`), `GET /resumes/:id/improved`, `GET /resumes/:id/original`
+- [x] `export/resume-export.service.ts`: DOCX (`docx`) and PDF (`pdfkit`), plain ATS-friendly B&W layout; `GET /resumes/:id/export?format=docx|pdf&versionId=`
+- [x] Web: tabs (Jobs · Improved resume); before/after side by side, change notes, "check these" box, download buttons
+- [x] Tests: export round-trips (DOCX via mammoth, PDF via unpdf), fact-check, versions service
+- [ ] Live check: 3–5 real resumes reviewed for fabricated employers/metrics — **needs Anthropic key**
+- [ ] Open the exported DOCX in Word and eyeball it
 
 ## Exit criteria
-- Exported DOCX opens cleanly in Word; PDF renders properly
-- No invented facts on test resumes (manual review)
+- [ ] No invented facts on test resumes (blocked on key)
+- [x] DOCX/PDF contain all sections (automated); visual check in Word pending
 
 ## Notes
-_(fill in)_
+- "Diff" is a side-by-side before/after, not a token-level diff.
+- Bullets in PDF use a "•" prefix without hanging indent.

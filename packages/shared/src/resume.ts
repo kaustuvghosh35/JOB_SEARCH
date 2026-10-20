@@ -21,6 +21,13 @@ export const improvedResumeSchema = z.object({
 
 export type ImprovedResume = z.infer<typeof improvedResumeSchema>;
 
+export type ImprovedVersion = {
+  id: string;
+  resumeId: string;
+  createdAt: string;
+  resume: ImprovedResume;
+};
+
 export type ResumeView = {
   id: string;
   filename: string | null;

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobsPanel } from "@/features/jobs/jobs-panel";
+import { ImprovedPanel } from "@/features/resume/improved-panel";
 import { ProfileSummary } from "@/features/resume/profile-summary";
 import { api } from "@/lib/api";
 
@@ -35,11 +37,22 @@ export default function ResumePage() {
           <div className="max-w-[720px]">
             <ProfileSummary profile={resume.profile} expiresAt={resume.expiresAt} />
           </div>
-          <JobsPanel
-            resumeId={resume.id}
-            defaultRole={resume.profile.headline}
-            defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
-          />
+          <Tabs defaultValue="jobs">
+            <TabsList variant="line">
+              <TabsTrigger value="jobs">Jobs</TabsTrigger>
+              <TabsTrigger value="improved">Improved resume</TabsTrigger>
+            </TabsList>
+            <TabsContent value="jobs" className="pt-6">
+              <JobsPanel
+                resumeId={resume.id}
+                defaultRole={resume.profile.headline}
+                defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
+              />
+            </TabsContent>
+            <TabsContent value="improved" className="pt-6">
+              <ImprovedPanel resumeId={resume.id} defaultRole={resume.profile.headline} />
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </main>
