@@ -23,4 +23,10 @@ Decisions made autonomously (per user instruction: decide, don't ask, log here).
 | 18 | 2026-10-20 | TinyFish key stored in root `.env` only (gitignored, verified with `git check-ignore`); never written to docs, code or commits | User supplied it for this app | Yes |
 | 19 | 2026-10-20 | Hit parser rewritten from real TinyFish titles; LinkedIn company falls back to the URL slug; dashes in LinkedIn titles are kept (not split) | Real titles differ from the guessed formats | Yes |
 | 20 | 2026-10-20 | Kept the two-query design (one LinkedIn, one Naukri), no Fetch enrichment | 100% job-page hit rate and useful snippets make Fetch unnecessary | Yes |
+| 21 | 2026-10-20 | LLM provider: Anthropic → Google Gemini (`@ai-sdk/google`; env `GEMINI_API_KEY`, `GEMINI_MODEL`); Gemini key stored only in gitignored `.env` | User request | Yes (provider is isolated in `llm/llm.module.ts`) |
+| 22 | 2026-10-20 | Default model `gemini-3-flash-preview` | Probed with the key: 2.5 models return 404 for new users; 3.5/3.7/3.8-flash and flash-latest timed out; this one answers in ~3 s. Preview models may be retired, hence the env override | Yes |
+| 23 | 2026-10-20 | Thinking level `low` for all LLM calls (`llm/provider-options.ts`) | Improve took 88 s with default thinking, 4 s with low, with no visible quality loss | Yes |
+| 24 | 2026-10-20 | Global `AiErrorFilter`: provider failures → 502, rate limit → 429 with a plain message | Raw provider errors surfaced as 500 | Yes |
+| 25 | 2026-10-20 | Prompts forbid new duties/scale words/placeholders; interview asks name first; profile summary uses no gendered pronouns | Gemini embellished ("high-traffic", "cross-functional") and wrote `[NAME]` | Yes |
+| 26 | 2026-10-20 | Naukri parser: a trailing known Indian city is treated as location, company left empty | Real titles like "Title - Skills - Pune" put the city in the company slot | Yes |
 | 13 | 2026-10-20 | Config/DB/LLM are `@Global()` Nest modules injected via symbols `ENV`, `DB`, `LLM_MODEL` | Keeps feature modules free of import wiring | Yes |

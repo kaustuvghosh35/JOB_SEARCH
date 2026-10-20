@@ -17,7 +17,7 @@ export class HealthController {
     return {
       status: 'ok',
       resumes: row?.n ?? 0,
-      anthropicKey: Boolean(this.env.ANTHROPIC_API_KEY),
+      geminiKey: Boolean(this.env.GEMINI_API_KEY),
       tinyfishKey: Boolean(this.env.TINYFISH_API_KEY),
     };
   }

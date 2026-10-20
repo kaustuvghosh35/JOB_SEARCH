@@ -8,10 +8,10 @@ _Last updated: 2026-10-20 — planning complete, no code written yet._
 |---|---|---|---|---|---|
 | 0 | Spike: de-risk job source | ½ d | ✅ | ≥60% of TinyFish results are real, current job pages; Nest↔AI SDK streaming works | [phase-0](phases/phase-0-spike.md) |
 | 1 | Foundations | 1 d | ✅ | App boots, DB migrates, B&W theme + Inter in place | [phase-1](phases/phase-1-foundations.md) |
-| 2 | Resume in | 1–2 d | 🟡 | 3+ real resumes parse to a correct profile | [phase-2](phases/phase-2-resume-in.md) |
+| 2 | Resume in | 1–2 d | ✅ | 3+ real resumes parse to a correct profile | [phase-2](phases/phase-2-resume-in.md) |
 | 3 | Jobs | 1–2 d | ✅ | Real resume → relevant jobs; Apply links open right postings | [phase-3](phases/phase-3-jobs.md) |
-| 4 | Improve + export | 1–2 d | 🟡 | DOCX/PDF opens cleanly; no invented facts | [phase-4](phases/phase-4-improve-export.md) |
-| 5 | Chatbot | 1–2 d | 🟡 | Refresh restores conversation; AI keeps context | [phase-5](phases/phase-5-chatbot.md) |
+| 4 | Improve + export | 1–2 d | ✅ | DOCX/PDF opens cleanly; no invented facts | [phase-4](phases/phase-4-improve-export.md) |
+| 5 | Chatbot | 1–2 d | ✅ | Refresh restores conversation; AI keeps context | [phase-5](phases/phase-5-chatbot.md) |
 | 6 | Polish + share | 1 d | 🟡 | Friends can use it end-to-end | [phase-6](phases/phase-6-polish-share.md) |
 
 Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2.
@@ -38,10 +38,12 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 
 - 2026-10-20 — TinyFish key added to `.env` (gitignored). Spike: 100% of hits are real job pages. Parser rewritten from real titles (38 API tests pass). Live jobs endpoint + UI verified. App running on :3000 (web) and :4000 (api).
 
+- 2026-10-20 — LLM switched from Anthropic to Google Gemini (`@ai-sdk/google`, `GEMINI_API_KEY` in `.env`). Model `gemini-3-flash-preview` (3 s on a probe; 2.5 models are closed to new keys; 3.5/3.7/3.8 hung or were slow). Thinking level low: improve went 88 s → 4 s. Verified live: profile, improve, chat, chat→resume, DOCX upload, jobs. Prompts tightened against embellishment and `[NAME]` placeholders. Provider errors now return 502/429 instead of 500.
+
 ## Needs from you (to finish)
-1. `ANTHROPIC_API_KEY` in `.env` (resume parsing, improve, chat all need it; restart the API after)
-2. Try 3 real resumes + one chat interview, check for invented facts
-3. Hosting: run locally, or deploy (API needs a volume for SQLite)
+1. Try your own real resumes (PDF with columns/tables especially) and read the improved text for embellishment
+2. Hosting: run locally, or deploy (API needs a volume for SQLite)
+3. Remote Gemini note: preview models can change or disappear; set `GEMINI_MODEL` in `.env` if one stops working
 
 ## Open questions / risks
 - [ ] TinyFish Search quality for LinkedIn/Naukri job queries and `site:` operator support (Phase 0)

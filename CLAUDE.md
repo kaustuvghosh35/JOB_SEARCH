@@ -4,7 +4,7 @@ Job-search POC: resume upload/chat → improved resume + LinkedIn/Naukri job lin
 
 - Plan: `docs/PLAN.md`. Progress: `docs/PROGRESS.md` (update after each task/phase). Phase tasks: `docs/phases/`.
 - Decisions made without asking go in `docs/DECISIONS.md` (append, dated). Don't ask the user for technical decisions; decide and log.
-- Claude (AI SDK) does resume work only. TinyFish does job search only. Job data is parsed by plain code.
+- The LLM (Gemini via Vercel AI SDK) does resume work only. TinyFish does job search only. Job data is parsed by plain code.
 - If `vp`/`fd`/`rg` are not installed, use `npm`/PowerShell/Grep tool and log it in `docs/DECISIONS.md`.
 
 # Response Style

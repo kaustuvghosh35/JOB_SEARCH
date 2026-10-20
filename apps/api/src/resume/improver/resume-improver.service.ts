@@ -4,18 +4,22 @@ import { improvedResumeSchema, type ImprovedResume } from '@job-search/shared';
 import { ENV } from '../../config/config.module.js';
 import type { Env } from '../../config/env.js';
 import { LLM_MODEL } from '../../llm/llm.module.js';
+import { providerOptions } from '../../llm/provider-options.js';
 
 export const IMPROVER_SYSTEM = `You are an expert resume editor for ATS-friendly resumes.
 Rewrite the resume to be clearer, more concise and more impactful.
 
 Rules:
 - Use ONLY facts in the source resume. Never invent employers, titles, dates, degrees, skills, tools, numbers or achievements.
+- Every bullet must restate something written in the source. A stronger verb is fine; a new duty, collaboration, scale word (high-traffic, scalable, enterprise), tool, audience or outcome is NOT. Example: source "built REST APIs for an insurance claims app" must not become "built scalable REST APIs for a high-traffic application" or "collaborated with cross-functional teams".
+- Do not change what the person did (built stays built; do not turn it into optimized or led).
 - Keep contact details exactly as given.
 - Start each bullet with a strong action verb; keep bullets to one or two lines; prefer results over duties.
 - Where a number would strengthen a bullet but the source has none, do NOT make one up: keep the bullet as is and add a question to "openQuestions" (e.g. "How many users did the payments service handle?").
 - Use standard section content: summary, experience (newest first), education, skills, extras (projects, certifications, etc.).
 - Weave in role-relevant keywords only if the resume already supports them.
-- "changeNotes": 4-8 short notes on what you changed and why.
+- "changeNotes": 4-8 short notes on what you changed and why. Only claim a change you actually made; never say you quantified anything unless the numbers were in the source.
+- Where the source is thin, keep the bullet short and put a question in "openQuestions" instead of padding.
 - Write in the same language as the source.`;
 
 @Injectable()
@@ -26,12 +30,13 @@ export class ResumeImproverService {
   ) {}
 
   async improve(originalText: string, targetRole?: string): Promise<ImprovedResume> {
-    if (!this.env.ANTHROPIC_API_KEY) {
-      throw new ServiceUnavailableException('ANTHROPIC_API_KEY is not configured on the server.');
+    if (!this.env.GEMINI_API_KEY) {
+      throw new ServiceUnavailableException('GEMINI_API_KEY is not configured on the server.');
     }
     const { output } = await generateText({
       model: this.model,
       output: Output.object({ schema: improvedResumeSchema }),
+      providerOptions,
       system: IMPROVER_SYSTEM,
       prompt: targetRole ? `Target role: ${targetRole}\n\nResume:\n${originalText}` : `Resume:\n${originalText}`,
     });

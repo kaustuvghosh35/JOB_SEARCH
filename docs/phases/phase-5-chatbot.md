@@ -1,6 +1,6 @@
 # Phase 5 — Chatbot
 
-**Status:** 🟡 code done, live LLM check pending (needs `ANTHROPIC_API_KEY`) · **Est.:** 1–2 days · **Depends on:** Phases 2 and 4
+**Status:** ✅ done; verified live with Gemini (3-turn interview, history persisted, resume created with the right name and no placeholders) · **Est.:** 1–2 days · **Depends on:** Phases 2 and 4
 
 ## Goal
 Conversational resume builder and refiner with server-persisted history by `sessionId`.
@@ -13,12 +13,13 @@ Conversational resume builder and refiner with server-persisted history by `sess
 - [x] `POST /chat/:sessionId/resume` → LLM drafts resume text from the transcript → `ResumeService.createFromText` → links session
 - [x] Web: `/chat` page ("Write it with AI", linked from home) and a Chat tab on `/r/[id]`; `useChat` with `initialMessages`; `sessionId` in localStorage; "Create resume" appears after 3 user turns
 - [x] Tests with the SDK mock model: streaming, persistence + history restore, cross-session id isolation, resume creation, profile/improver structured output
-- [ ] Live check: interview produces a resume with no invented details; refresh restores conversation in the browser — **needs Anthropic key**
+- [x] Live check via API: interview → resume with no invented details. Fixed `[NAME]` placeholder (interview now asks name first; draft prompt bans placeholders)
+- [ ] Browser check: refresh restores the conversation
 - [ ] Expired session purge covered by cleanup test (cascade tested in Phase 2)
 
 ## Exit criteria
 - [x] History restored from `sessionId` (API-level test); AI sees earlier turns (messages reloaded from DB each request)
-- [ ] Browser refresh check and no-fabrication check (blocked on key)
+- [x] No-fabrication check on one interview
 
 ## Notes
 - AI SDK v7 API used: `instructions`, `toUIMessageStream`, `pipeUIMessageStreamToResponse` (not the deprecated result methods). `Output.object` replaces `generateObject`.

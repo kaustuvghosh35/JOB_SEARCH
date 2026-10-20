@@ -49,9 +49,18 @@ const companyFromLinkedinSlug = (url: URL): string | null => {
   return m[1].split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
+const CITIES = new Set(
+  'bengaluru bangalore mumbai delhi new delhi pune hyderabad chennai kolkata ahmedabad gurgaon gurugram noida ghaziabad faridabad jaipur lucknow chandigarh kochi indore nagpur coimbatore vadodara surat bhubaneswar thiruvananthapuram mysuru mysore visakhapatnam remote'
+    .split(' ')
+    .concat(['new delhi', 'delhi / ncr', 'delhi ncr']),
+);
+
 const parseNaukri = (raw: string): Parsed => {
   const t = stripNoise(raw).replace(/\s*[-–—]\s*\d+\+?(?:\s*to\s*\d+)?(?:\s*years?\b.*)?$/i, '');
   const parts = t.split(SEP).map(clean).filter(Boolean);
+  if (parts.length >= 3 && CITIES.has(parts.at(-1)!.toLowerCase())) {
+    return { title: parts.slice(0, -1).join(' - '), location: parts.at(-1)!, company: null };
+  }
   if (parts.length >= 3) {
     return { title: parts.slice(0, -2).join(' - '), location: parts.at(-2)!, company: parts.at(-1)! };
   }

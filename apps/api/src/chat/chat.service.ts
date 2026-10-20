@@ -11,6 +11,7 @@ import {
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { LLM_MODEL } from '../llm/llm.module.js';
+import { providerOptions } from '../llm/provider-options.js';
 import { VersionsService } from '../resume/improver/versions.service.js';
 import { ResumeService, type ResumeView } from '../resume/resume.service.js';
 import { ChatRepository } from './chat.repository.js';
@@ -56,6 +57,7 @@ export class ChatService {
       model: this.model,
       instructions: this.instructions(linkedResume),
       messages: await convertToModelMessages(messages),
+      providerOptions,
     });
     void result.consumeStream();
 
@@ -76,7 +78,7 @@ export class ChatService {
       throw new BadRequestException('Tell me a bit more about your background first.');
     }
     const transcript = messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
-    const { text } = await generateText({ model: this.model, instructions: DRAFT_PROMPT, prompt: transcript });
+    const { text } = await generateText({ model: this.model, instructions: DRAFT_PROMPT, prompt: transcript, providerOptions });
     const resume = await this.resumes.createFromText(text);
     this.repo.linkResume(sessionId, resume.id);
     return resume;
@@ -99,6 +101,6 @@ export class ChatService {
   }
 
   private requireKey() {
-    if (!this.env.ANTHROPIC_API_KEY) throw new ServiceUnavailableException('ANTHROPIC_API_KEY is not configured on the server.');
+    if (!this.env.GEMINI_API_KEY) throw new ServiceUnavailableException('GEMINI_API_KEY is not configured on the server.');
   }
 }

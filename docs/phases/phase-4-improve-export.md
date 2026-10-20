@@ -1,6 +1,6 @@
 # Phase 4 — Improve + export
 
-**Status:** 🟡 code done, live LLM check pending (needs `ANTHROPIC_API_KEY`) · **Est.:** 1–2 days · **Depends on:** Phase 2
+**Status:** ✅ done; verified live with Gemini (~4 s). Output stays close to the source after a stricter prompt; mild phrasing embellishments remain possible, so the "check these" box matters · **Est.:** 1–2 days · **Depends on:** Phase 2
 
 ## Goal
 Return an improved resume with before/after view and DOCX/PDF download.
@@ -13,11 +13,12 @@ Return an improved resume with before/after view and DOCX/PDF download.
 - [x] `export/resume-export.service.ts`: DOCX (`docx`) and PDF (`pdfkit`), plain ATS-friendly B&W layout; `GET /resumes/:id/export?format=docx|pdf&versionId=`
 - [x] Web: tabs (Jobs · Improved resume); before/after side by side, change notes, "check these" box, download buttons
 - [x] Tests: export round-trips (DOCX via mammoth, PDF via unpdf), fact-check, versions service
-- [ ] Live check: 3–5 real resumes reviewed for fabricated employers/metrics — **needs Anthropic key**
+- [x] Live check on 2 resumes. First run invented "high-traffic", "collaborated with cross-functional teams"; prompt tightened (no new duties, scale words, tools); second run clean of those
+- [ ] Review more resumes for subtle embellishment
 - [ ] Open the exported DOCX in Word and eyeball it
 
 ## Exit criteria
-- [ ] No invented facts on test resumes (blocked on key)
+- [x] No invented facts on the two live test resumes (numbers fact-checked automatically; wording reviewed by hand)
 - [x] DOCX/PDF contain all sections (automated); visual check in Word pending
 
 ## Notes

@@ -13,16 +13,16 @@ Fire-and-forget: **no login, no user accounts**. Only `resumeId` and `sessionId`
 | Concern | Owner |
 |---|---|
 | Finding jobs (LinkedIn/Naukri postings + apply URLs) | **TinyFish** Search (Fetch optional) — nothing else |
-| Understanding the resume (profile: title, skills, years, location) | **Claude** via Vercel AI SDK |
-| Improving/rewriting the resume, chat interview, refine follow-ups | **Claude** via Vercel AI SDK |
+| Understanding the resume (profile: title, skills, years, location) | **Gemini** via Vercel AI SDK |
+| Improving/rewriting the resume, chat interview, refine follow-ups | **Gemini** via Vercel AI SDK |
 | Job results → cards (title/company/location), de-dupe, match score | **Plain code** (parse TinyFish `title`/`snippet`, skill-keyword overlap) — no LLM on job data in v1 |
 
-Claude never browses or searches. TinyFish never sees the resume — it only gets search queries built from the profile (title, top skills, city).
+The LLM never browses or searches. TinyFish never sees the resume — it only gets search queries built from the profile (title, top skills, city).
 
 ## Stack
 - **Backend:** NestJS (TypeScript) — hard requirement
 - **Frontend:** Next.js + Tailwind + shadcn/ui
-- **LLM:** Vercel AI SDK (`ai` + `@ai-sdk/anthropic`), model `claude-sonnet-5-5`
+- **LLM:** Vercel AI SDK (`ai` + `@ai-sdk/google`), model `gemini-3-flash-preview` (env `GEMINI_MODEL`; thinking level low for speed, see `llm/provider-options.ts`)
   - `generateObject` + Zod for profile extraction and resume improvement
   - `streamText` for chat, piped from a Nest controller via `pipeUIMessageStreamToResponse` (v5) / `pipeDataStreamToResponse` (v4) — check installed version
   - Frontend `useChat` (`@ai-sdk/react`) against the Nest URL (CORS on)
@@ -80,7 +80,7 @@ Rules: controllers thin → services hold logic → repositories are the only co
 `POST /resumes` (multipart) · `POST /resumes/text` · `GET /resumes/:id` · `POST /resumes/:id/improve` · `GET /resumes/:id/export?format=docx|pdf` · `GET /resumes/:id/jobs` (filters: location, remote, role) · `POST /chat` (streaming; optional `sessionId`, `resumeId`) · `GET /chat/:sessionId`
 
 ## Flow
-1. **Upload**: file → text → Claude extracts profile → save → redirect `/r/<id>`.
+1. **Upload**: file → text → Gemini extracts profile → save → redirect `/r/<id>`.
 2. **Jobs**: 2–3 queries from profile (title + top skills + location; editable filters) → TinyFish → deterministic parse to `{title, company, location, snippet, source, applyLinks[]}` → de-dupe → keyword score → cards with **Apply ↗** (new tab, `rel="noopener noreferrer"`).
 3. **Improve**: rewrite (action verbs, quantified bullets, ATS keywords) **without inventing facts**; flag gaps as questions; before/after + DOCX/PDF.
 4. **Chat**: client sends `{sessionId, newMessage}`; server loads history, `streamText`, persists reply in `onFinish`; `GET /chat/:sessionId` hydrates `initialMessages`. Same mechanism powers "refine my resume" follow-ups. "Create resume" saves the draft as a `resumes` row (no blob) and joins the normal flow.
@@ -98,10 +98,10 @@ Rules: controllers thin → services hold logic → repositories are the only co
 
 ## Caveats
 - Results depend on TinyFish's index; may be stale or non-job pages (hence the Phase 0 spike).
-- Resume text goes to Anthropic; only derived queries go to TinyFish.
+- Resume text goes to Google Gemini; only derived queries go to TinyFish.
 - Re-check TinyFish free limits at implementation time.
 - Anyone with a resume URL can view it until TTL expiry (UUIDs unguessable; fine for POC).
 - Optional shared access-code env var if deployed publicly (guards API credits).
 
 ## Env vars
-`ANTHROPIC_API_KEY`, `TINYFISH_API_KEY`, `DATABASE_PATH`, `RESUME_TTL_HOURS`, (optional) `ACCESS_CODE`
+`GEMINI_API_KEY`, `GEMINI_MODEL`, `TINYFISH_API_KEY`, `DATABASE_PATH`, `RESUME_TTL_HOURS`, (optional) `ACCESS_CODE`

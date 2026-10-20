@@ -10,8 +10,8 @@ import { ResumeImproverService } from './resume/improver/resume-improver.service
 import type { VersionsService } from './resume/improver/versions.service.js';
 import type { ResumeService } from './resume/resume.service.js';
 
-const env = { ...loadEnv(), ANTHROPIC_API_KEY: 'test' };
-const noKey = { ...env, ANTHROPIC_API_KEY: undefined };
+const env = { ...loadEnv(), GEMINI_API_KEY: 'test' };
+const noKey = { ...env, GEMINI_API_KEY: undefined };
 
 const usage = {
   inputTokens: { total: 1, noCache: 1, cacheRead: undefined, cacheWrite: undefined },
@@ -62,7 +62,7 @@ describe('ProfileService', () => {
   });
 
   it('fails clearly without an API key', async () => {
-    await expect(new ProfileService(jsonModel({}), noKey).extract('x')).rejects.toThrow(/ANTHROPIC_API_KEY/);
+    await expect(new ProfileService(jsonModel({}), noKey).extract('x')).rejects.toThrow(/GEMINI_API_KEY/);
   });
 });
 

@@ -24,14 +24,12 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.101",
+    "@job-search/shared": "*",
     "@nestjs/common": "^12.0.1",
     "@nestjs/core": "^12.0.1",
     "@nestjs/platform-express": "^12.0.1",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "@job-search/shared": "*",
     "@nestjs/schedule": "^12.0.0",
-    "@ai-sdk/anthropic": "latest",
     "ai": "latest",
     "better-sqlite3": "^12.0.0",
     "docx": "^9.0.0",
@@ -39,6 +37,8 @@
     "mammoth": "^1.9.0",
     "multer": "^2.0.0",
     "pdfkit": "^0.17.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
     "unpdf": "latest",
     "zod": "^4.0.0"
   },
@@ -47,20 +47,20 @@
     "@nestjs/mau": "^0.2.6",
     "@nestjs/schematics": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
+    "@types/better-sqlite3": "^7.6.0",
     "@types/express": "^5.0.0",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.0.0",
+    "@types/pdfkit": "^0.17.0",
     "@types/supertest": "^7.0.0",
     "@vitest/coverage-v8": "^4.1.2",
+    "drizzle-kit": "latest",
     "oxlint": "^1.58.0",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.2",
-    "@types/better-sqlite3": "^7.6.0",
-    "@types/multer": "^2.0.0",
-    "@types/pdfkit": "^0.17.0",
-    "drizzle-kit": "latest"
+    "vitest": "^4.1.2"
   }
 }

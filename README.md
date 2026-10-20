@@ -5,7 +5,7 @@ Upload a resume (or write one with AI) → improved resume + matching LinkedIn/N
 ## Run
 ```bash
 npm install
-cp .env.example .env   # fill ANTHROPIC_API_KEY and TINYFISH_API_KEY
+cp .env.example .env   # fill GEMINI_API_KEY and TINYFISH_API_KEY
 npm run build -w @job-search/shared
 npm run dev            # api :4000, web :3000
 ```
@@ -22,4 +22,4 @@ Without keys the app still boots: upload/chat return a clear 503, jobs show "TIN
 - `apps/api` NestJS + Drizzle/SQLite (resume, profile, jobs, chat, cleanup modules)
 - `apps/web` Next.js + shadcn (black and white, Inter)
 - `packages/shared` zod schemas shared by both
-- Data auto-expires after `RESUME_TTL_HOURS` (default 7 days). Resume text is sent to Anthropic; only role/skills/city go to TinyFish.
+- Data auto-expires after `RESUME_TTL_HOURS` (default 7 days). Resume text is sent to Google Gemini; only role/skills/city go to TinyFish.
