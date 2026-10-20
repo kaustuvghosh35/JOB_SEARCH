@@ -10,6 +10,8 @@ npm run build -w @job-search/shared
 npm run dev            # api :4000, web :3000
 ```
 
+Gemini free tier is about 20 requests/day per model; the API falls back through `GEMINI_FALLBACK_MODELS` when one runs out. A paid key removes the limit.
+
 Without keys the app still boots: upload/chat return a clear 503, jobs show "TINYFISH_API_KEY is not configured".
 
 ## Useful commands

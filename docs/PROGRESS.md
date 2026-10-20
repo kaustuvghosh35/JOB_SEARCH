@@ -40,6 +40,8 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 
 - 2026-10-20 — LLM switched from Anthropic to Google Gemini (`@ai-sdk/google`, `GEMINI_API_KEY` in `.env`). Model `gemini-3-flash-preview` (3 s on a probe; 2.5 models are closed to new keys; 3.5/3.7/3.8 hung or were slow). Thinking level low: improve went 88 s → 4 s. Verified live: profile, improve, chat, chat→resume, DOCX upload, jobs. Prompts tightened against embellishment and `[NAME]` placeholders. Provider errors now return 502/429 instead of 500.
 
+- 2026-10-20 — Bug: every AI call returned 500. Cause: free-tier Gemini quota (20 requests/day per model) exhausted on `gemini-3-flash-preview` by testing; error filter missed the SDK's `RetryError`. Fix: default `gemini-3.5-flash` plus model fallback chain, filter now returns a clear 429. 41 tests pass; profile (7 s), improve (16 s), chat verified live.
+
 ## Needs from you (to finish)
 1. Try your own real resumes (PDF with columns/tables especially) and read the improved text for embellishment
 2. Hosting: run locally, or deploy (API needs a volume for SQLite)
