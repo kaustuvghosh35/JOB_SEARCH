@@ -16,4 +16,8 @@ Decisions made autonomously (per user instruction: decide, don't ask, log here).
 | 10 | 2026-10-20 | API port 4000, web port 3000; env loaded via `process.loadEnvFile` from `apps/api/.env` or root `.env` | No `@nestjs/config` dependency needed | Yes |
 | 11 | 2026-10-20 | Removed `cacheComponents`/`partialPrefetching` from Next config template | Experimental; friction for a client-fetching app | Yes |
 | 12 | 2026-10-20 | shadcn theme: red/blue tokens (destructive, sidebar-primary) replaced with grays; light theme only | User asked strictly black & white | Yes |
+| 14 | 2026-10-20 | AI SDK v7 APIs: `generateText` + `Output.object` (not `generateObject`), `instructions`/`system` (kept `system` in profile/improver; deprecated alias), `toUIMessageStream` + `pipeUIMessageStreamToResponse` | Installed `ai@7`; docs bundled in `node_modules/ai/docs` | Yes |
+| 15 | 2026-10-20 | Chat `sessionId` is generated client-side (UUID in localStorage) and the server creates the session on first message | Simplest fit for useChat's `id` and no-login model | Yes |
+| 16 | 2026-10-20 | Added number "fact check" on improved resumes: figures not in the original are listed under "Check these before you send it" | Cheap guard against fabricated metrics beyond prompt rules | Yes |
+| 17 | 2026-10-20 | Job pipeline uses synthetic fixtures for title patterns until a TinyFish key allows real ones | No key available; Phase 0 spike still pending | Yes |
 | 13 | 2026-10-20 | Config/DB/LLM are `@Global()` Nest modules injected via symbols `ENV`, `DB`, `LLM_MODEL` | Keeps feature modules free of import wiring | Yes |

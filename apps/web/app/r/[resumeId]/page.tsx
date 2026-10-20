@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChatPanel } from "@/features/chat/chat-panel";
 import { JobsPanel } from "@/features/jobs/jobs-panel";
 import { ImprovedPanel } from "@/features/resume/improved-panel";
 import { ProfileSummary } from "@/features/resume/profile-summary";
@@ -41,6 +42,7 @@ export default function ResumePage() {
             <TabsList variant="line">
               <TabsTrigger value="jobs">Jobs</TabsTrigger>
               <TabsTrigger value="improved">Improved resume</TabsTrigger>
+              <TabsTrigger value="chat">Chat</TabsTrigger>
             </TabsList>
             <TabsContent value="jobs" className="pt-6">
               <JobsPanel
@@ -51,6 +53,13 @@ export default function ResumePage() {
             </TabsContent>
             <TabsContent value="improved" className="pt-6">
               <ImprovedPanel resumeId={resume.id} defaultRole={resume.profile.headline} />
+            </TabsContent>
+            <TabsContent value="chat" className="max-w-[720px] pt-6">
+              <ChatPanel
+                storageKey={`chat:${resume.id}`}
+                resumeId={resume.id}
+                placeholder="Ask for changes, e.g. make my summary shorter, or tailor this for a backend role."
+              />
             </TabsContent>
           </Tabs>
         </>

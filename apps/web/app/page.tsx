@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { UploadForm } from "@/features/upload/upload-form";
 
 export default function Home() {
@@ -10,6 +11,12 @@ export default function Home() {
         </p>
       </header>
       <UploadForm />
+      <p className="text-sm text-muted-foreground">
+        No resume yet?{" "}
+        <Link href="/chat" className="font-medium text-foreground underline underline-offset-4">
+          Write it with AI
+        </Link>
+      </p>
     </main>
   );
 }
