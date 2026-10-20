@@ -1,0 +1,14 @@
+{
+  "name": "job-search",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:api dev:web",
+    "dev:api": "npm run start:dev -w @job-search/api",
+    "dev:web": "npm run dev -w @job-search/web",
+    "build": "npm run build -w @job-search/shared && npm run build -w @job-search/api && npm run build -w @job-search/web"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
