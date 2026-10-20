@@ -8,13 +8,13 @@ export const resumeToText = (r: ImprovedResume): string => {
   if (r.experience.length) {
     lines.push('', 'EXPERIENCE');
     for (const e of r.experience) {
-      lines.push(`${e.role}, ${e.company}${e.period ? ` (${e.period})` : ''}`);
+      lines.push(`${[e.role, e.company].filter(Boolean).join(', ')}${e.period ? ` (${e.period})` : ''}`);
       e.bullets.forEach((b) => lines.push(`- ${b}`));
     }
   }
   if (r.education.length) {
     lines.push('', 'EDUCATION');
-    r.education.forEach((e) => lines.push(`${e.degree}, ${e.school}${e.period ? ` (${e.period})` : ''}`));
+    r.education.forEach((e) => lines.push(`${[e.degree, e.school].filter(Boolean).join(', ')}${e.period ? ` (${e.period})` : ''}`));
   }
   if (r.skills.length) lines.push('', 'SKILLS', r.skills.join(', '));
   for (const x of r.extras) lines.push('', x.title.toUpperCase(), ...x.items.map((i) => `- ${i}`));

@@ -20,6 +20,13 @@ const resume: ImprovedResume = {
 describe('ResumeExportService', () => {
   const svc = new ResumeExportService();
 
+  it('does not leave a dangling comma when the company is unknown', async () => {
+    const r = { ...resume, experience: [{ role: 'Design Intern', company: '', period: '6 months', bullets: ['Worked on UI.'] }] };
+    const { value } = await mammoth.extractRawText({ buffer: await svc.toDocx(r) });
+    expect(value).toContain('Design Intern');
+    expect(value).not.toContain('Design Intern,');
+  });
+
   it('writes a DOCX that contains every section', async () => {
     const { value } = await mammoth.extractRawText({ buffer: await svc.toDocx(resume) });
     for (const s of ['Asha Rao', 'asha@example.com', 'SUMMARY', 'billing API', 'NIT Trichy', 'NestJS', 'AWS Cloud Practitioner']) {

@@ -5,6 +5,7 @@ import type { ImprovedResume, ImprovedVersion } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_URL, api } from "@/lib/api";
+import { consumeAutoImprove } from "./auto-improve";
 
 const field = "h-9 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-2";
 
@@ -22,7 +23,7 @@ function ResumeDocument({ resume }: { resume: ImprovedResume }) {
           {resume.experience.map((e, i) => (
             <div key={i} className="flex flex-col gap-1">
               <p className="font-medium">
-                {e.role}, {e.company}
+                {[e.role, e.company].filter(Boolean).join(", ")}
                 {e.period && <span className="font-normal text-muted-foreground"> · {e.period}</span>}
               </p>
               <ul className="list-disc pl-5">
@@ -39,7 +40,7 @@ function ResumeDocument({ resume }: { resume: ImprovedResume }) {
           <h4 className="font-semibold uppercase tracking-wide">Education</h4>
           {resume.education.map((e, i) => (
             <p key={i}>
-              {e.degree}, {e.school}
+              {[e.degree, e.school].filter(Boolean).join(", ")}
               {e.period && <span className="text-muted-foreground"> · {e.period}</span>}
             </p>
           ))}
@@ -104,6 +105,11 @@ export function VersionPanel({ resumeId, defaultRole }: { resumeId: string; defa
       setBusy(false);
     }
   }, [resumeId, targetRole, extra, revise, version]);
+
+  useEffect(() => {
+    if (!loading && !version && consumeAutoImprove(resumeId)) void improve();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   return (
     <section className="flex flex-col gap-4" aria-labelledby="resume-heading">

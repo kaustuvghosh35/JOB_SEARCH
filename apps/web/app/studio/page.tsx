@@ -1,11 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChatPanel } from "@/features/chat/chat-panel";
 import { UploadForm } from "@/features/upload/upload-form";
-
-const toStudio = (id: string) => `/studio/${id}`;
+import { markAutoImprove } from "@/features/studio/auto-improve";
 
 export default function StudioStart() {
   return (
@@ -15,26 +12,11 @@ export default function StudioStart() {
       </Link>
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold">Resume studio</h1>
-        <p className="text-muted-foreground">Improve the resume you have, or build one by answering a few questions.</p>
+        <p className="text-muted-foreground">
+          Upload your resume, or type it in. Then improve it with AI, download it, and search jobs.
+        </p>
       </header>
-
-      <Tabs defaultValue="improve">
-        <TabsList variant="line">
-          <TabsTrigger value="improve">Improve my resume</TabsTrigger>
-          <TabsTrigger value="write">Write with AI</TabsTrigger>
-        </TabsList>
-        <TabsContent value="improve" className="pt-6">
-          <UploadForm destination={toStudio} />
-        </TabsContent>
-        <TabsContent value="write" className="pt-6">
-          <ChatPanel
-            storageKey="chat:new"
-            resumeId={null}
-            createdHref={toStudio}
-            placeholder="Say hi, or tell me which role you are aiming for. After a few answers, press Create resume."
-          />
-        </TabsContent>
-      </Tabs>
+      <UploadForm inlineText destination={(id) => `/studio/${id}`} onCreated={markAutoImprove} />
     </main>
   );
 }

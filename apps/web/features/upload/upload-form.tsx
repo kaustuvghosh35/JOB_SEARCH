@@ -8,8 +8,15 @@ import { api } from "@/lib/api";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT = ".pdf,.docx";
+const MIN_TEXT = 30;
 
-export function UploadForm({ destination = (id: string) => `/r/${id}` }: { destination?: (id: string) => string }) {
+type Props = {
+  destination?: (id: string) => string;
+  onCreated?: (id: string) => void;
+  inlineText?: boolean;
+};
+
+export function UploadForm({ destination = (id: string) => `/r/${id}`, onCreated, inlineText = false }: Props) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -17,12 +24,14 @@ export function UploadForm({ destination = (id: string) => `/r/${id}` }: { desti
   const [error, setError] = useState<string | null>(null);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [text, setText] = useState("");
+  const showText = inlineText || pasteOpen;
 
   async function submit(init: RequestInit) {
     setBusy(true);
     setError(null);
     try {
       const resume = await api<ResumeView>(init.method === "POST" && init.body instanceof FormData ? "/resumes" : "/resumes/text", init);
+      onCreated?.(resume.id);
       router.push(destination(resume.id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -72,26 +81,39 @@ export function UploadForm({ destination = (id: string) => `/r/${id}` }: { desti
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3 text-sm">
-        <Button variant="outline" disabled={busy} onClick={() => setPasteOpen((v) => !v)}>
-          {pasteOpen ? "Hide text box" : "Paste text instead"}
-        </Button>
-      </div>
+      {inlineText ? (
+        <div className="flex items-center gap-3 text-sm text-muted-foreground" aria-hidden="true">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Button variant="outline" disabled={busy} onClick={() => setPasteOpen((v) => !v)}>
+            {pasteOpen ? "Hide text box" : "Paste text instead"}
+          </Button>
+        </div>
+      )}
 
-      {pasteOpen && (
+      {showText && (
         <div className="flex flex-col gap-3">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={10}
-            placeholder="Paste your resume text"
+            rows={inlineText ? 12 : 10}
+            aria-label="Resume text"
+            placeholder={
+              inlineText
+                ? "Type or paste your resume, or just tell us about yourself: roles, skills, education, achievements. Rough notes are fine, the AI will turn them into a resume."
+                : "Paste your resume text"
+            }
             className="w-full resize-y rounded-lg border border-border bg-background p-3 text-sm focus-visible:outline-2"
           />
           <Button
-            disabled={busy || text.trim().length < 80}
+            disabled={busy || text.trim().length < MIN_TEXT}
             onClick={() => submit({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })}
           >
-            {busy ? "Reading..." : "Use this text"}
+            {busy ? "Reading..." : inlineText ? "Continue" : "Use this text"}
           </Button>
         </div>
       )}

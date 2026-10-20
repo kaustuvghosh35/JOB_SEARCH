@@ -19,13 +19,13 @@ const toBlocks = (r: ImprovedResume): Block[] => {
   if (r.experience.length) {
     b.push({ kind: 'heading', text: 'Experience' });
     for (const e of r.experience) {
-      b.push({ kind: 'sub', text: `${e.role}, ${e.company}`, meta: e.period ?? undefined });
+      b.push({ kind: 'sub', text: [e.role, e.company].filter(Boolean).join(', '), meta: e.period ?? undefined });
       e.bullets.forEach((t) => b.push({ kind: 'bullet', text: t }));
     }
   }
   if (r.education.length) {
     b.push({ kind: 'heading', text: 'Education' });
-    r.education.forEach((e) => b.push({ kind: 'sub', text: `${e.degree}, ${e.school}`, meta: e.period ?? undefined }));
+    r.education.forEach((e) => b.push({ kind: 'sub', text: [e.degree, e.school].filter(Boolean).join(', '), meta: e.period ?? undefined }));
   }
   if (r.skills.length) b.push({ kind: 'heading', text: 'Skills' }, { kind: 'text', text: r.skills.join(', ') });
   for (const x of r.extras) {

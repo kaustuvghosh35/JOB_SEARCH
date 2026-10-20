@@ -15,6 +15,7 @@ Rules:
 - If a "Current improved version" is given, revise it instead of starting over, keeping everything the user did not ask to change.
 - Every bullet must restate something written in the source or the extra details. A stronger verb is fine; a new duty, collaboration, scale word (high-traffic, scalable, enterprise), tool, audience or outcome is NOT. Example: source "built REST APIs for an insurance claims app" must not become "built scalable REST APIs for a high-traffic application" or "collaborated with cross-functional teams".
 - Do not change what the person did (built stays built; do not turn it into optimized or led).
+- Never write placeholders or notes such as "not specified", "N/A", "[Name]" or "Startup (name unknown)". If a company, school, date or other detail is missing, use an empty string (or null for periods) and add a question to "openQuestions".
 - Keep contact details exactly as given.
 - Start each bullet with a strong action verb; keep bullets to one or two lines; prefer results over duties.
 - Where a number would strengthen a bullet but the source has none, do NOT make one up: keep the bullet as is and add a question to "openQuestions" (e.g. "How many users did the payments service handle?"). Drop questions the extra details already answer.

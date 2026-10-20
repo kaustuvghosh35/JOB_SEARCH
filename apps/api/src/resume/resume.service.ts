@@ -9,6 +9,7 @@ import { ResumeRepository, type ResumeRow } from './resume.repository.js';
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 export const MAX_TEXT_CHARS = 30_000;
+const MIN_TEXT_CHARS = 30;
 
 export type ResumeView = Pick<ResumeRow, 'id' | 'filename' | 'profile' | 'createdAt' | 'expiresAt'>;
 
@@ -41,7 +42,7 @@ export class ResumeService {
 
   async createFromText(raw: string): Promise<ResumeView> {
     const text = normalizeText(raw);
-    if (text.length < MIN_RESUME_CHARS) throw new BadRequestException('Resume text is too short.');
+    if (text.length < MIN_TEXT_CHARS) throw new BadRequestException('Write a little more about yourself (a few lines is enough).');
     if (text.length > MAX_TEXT_CHARS) throw new BadRequestException('Resume text is too long.');
     return this.save(text, null, null);
   }
