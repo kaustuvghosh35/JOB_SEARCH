@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
+import { JobsPanel } from "@/features/jobs/jobs-panel";
 import { ProfileSummary } from "@/features/resume/profile-summary";
 import { api } from "@/lib/api";
 
@@ -19,7 +20,7 @@ export default function ResumePage() {
   }, [resumeId]);
 
   return (
-    <main className="mx-auto flex w-full max-w-[720px] flex-1 flex-col gap-8 px-4 py-16">
+    <main className="mx-auto flex w-full max-w-[960px] flex-1 flex-col gap-10 px-4 py-16">
       <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
         ← New resume
       </Link>
@@ -29,7 +30,18 @@ export default function ResumePage() {
         </p>
       )}
       {!error && !resume && <div className="h-40 animate-pulse rounded-lg bg-muted" aria-label="Loading" />}
-      {resume?.profile && <ProfileSummary profile={resume.profile} expiresAt={resume.expiresAt} />}
+      {resume?.profile && (
+        <>
+          <div className="max-w-[720px]">
+            <ProfileSummary profile={resume.profile} expiresAt={resume.expiresAt} />
+          </div>
+          <JobsPanel
+            resumeId={resume.id}
+            defaultRole={resume.profile.headline}
+            defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
+          />
+        </>
+      )}
     </main>
   );
 }
