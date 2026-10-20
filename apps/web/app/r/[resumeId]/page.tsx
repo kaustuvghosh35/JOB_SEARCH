@@ -15,6 +15,8 @@ export default function ResumePage() {
   const { resumeId } = useParams<{ resumeId: string }>();
   const [resume, setResume] = useState<ResumeView | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<string>("jobs");
+  const [versionTick, setVersionTick] = useState(0);
 
   useEffect(() => {
     api<ResumeView>(`/resumes/${resumeId}`)
@@ -38,7 +40,7 @@ export default function ResumePage() {
           <div className="max-w-[720px]">
             <ProfileSummary profile={resume.profile} expiresAt={resume.expiresAt} />
           </div>
-          <Tabs defaultValue="jobs">
+          <Tabs value={tab} onValueChange={(v) => setTab(String(v))}>
             <TabsList variant="line">
               <TabsTrigger value="jobs">Jobs</TabsTrigger>
               <TabsTrigger value="improved">Improved resume</TabsTrigger>
@@ -52,12 +54,16 @@ export default function ResumePage() {
               />
             </TabsContent>
             <TabsContent value="improved" className="pt-6">
-              <ImprovedPanel resumeId={resume.id} defaultRole={resume.profile.headline} />
+              <ImprovedPanel key={versionTick} resumeId={resume.id} defaultRole={resume.profile.headline} />
             </TabsContent>
             <TabsContent value="chat" className="max-w-[720px] pt-6">
               <ChatPanel
                 storageKey={`chat:${resume.id}`}
                 resumeId={resume.id}
+                onApplied={() => {
+                  setVersionTick((n) => n + 1);
+                  setTab("improved");
+                }}
                 placeholder="Ask for changes, e.g. make my summary shorter, or tailor this for a backend role."
               />
             </TabsContent>

@@ -51,6 +51,26 @@ describe('VersionsService', () => {
     expect(svc.latest(row.id).resume.experience[0].bullets[0]).toBe('Cut latency by 45%.');
   });
 
+  it('revises the latest version with extra details and does not flag figures they contain', async () => {
+    const inputs: unknown[] = [];
+    const db = openDb(':memory:');
+    const row = db.insert(resumes).values({ originalText: original, expiresAt: new Date(Date.now() + 1e6) }).returning().get();
+    const outputs = [improved('Cut latency by 30%.'), improved('Cut latency by 30% and served 500 daily users.')];
+    const svc = new VersionsService(
+      { getRow: () => row } as unknown as ResumeService,
+      { improve: async (i: unknown) => (inputs.push(i), outputs.shift()) } as unknown as ResumeImproverService,
+      new VersionRepository(db),
+      new ResumeExportService(),
+    );
+
+    await svc.improve(row.id);
+    const v2 = await svc.improve(row.id, { extra: 'It served 500 daily users.', revise: true });
+
+    expect(inputs[0]).toMatchObject({ base: undefined, extra: undefined });
+    expect(inputs[1]).toMatchObject({ extra: 'It served 500 daily users.', base: { fullName: 'Asha Rao' } });
+    expect(v2.resume.openQuestions).toEqual([]);
+  });
+
   it('404s before any version and exports with a clean filename', async () => {
     const { svc, row } = setup(improved('Led a team of 4.'));
     expect(() => svc.latest(row.id)).toThrow(NotFoundException);

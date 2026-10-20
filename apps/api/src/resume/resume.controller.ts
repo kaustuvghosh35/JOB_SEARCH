@@ -20,7 +20,13 @@ import { VersionsService } from './improver/versions.service.js';
 import { MAX_UPLOAD_BYTES, ResumeService } from './resume.service.js';
 
 const textBody = z.object({ text: z.string() });
-const improveBody = z.object({ targetRole: z.string().max(120).optional() }).default({});
+const improveBody = z
+  .object({
+    targetRole: z.string().max(120).optional(),
+    extra: z.string().max(6000).optional(),
+    revise: z.boolean().optional(),
+  })
+  .default({});
 const exportQuery = z.object({ format: z.enum(['docx', 'pdf']), versionId: z.uuid().optional() });
 
 @Controller('resumes')
@@ -58,7 +64,7 @@ export class ResumeController {
   improve(@Param('id', ParseUUIDPipe) id: string, @Body() body: unknown) {
     const parsed = improveBody.safeParse(body ?? {});
     if (!parsed.success) throw new BadRequestException('Invalid body.');
-    return this.versions.improve(id, parsed.data.targetRole);
+    return this.versions.improve(id, parsed.data);
   }
 
   @Get(':id/improved')

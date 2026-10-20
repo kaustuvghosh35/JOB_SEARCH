@@ -14,6 +14,7 @@ import { LLM_MODEL } from '../llm/llm.module.js';
 import { providerOptions } from '../llm/provider-options.js';
 import { VersionsService } from '../resume/improver/versions.service.js';
 import { ResumeService, type ResumeView } from '../resume/resume.service.js';
+import type { ImprovedVersion } from '@job-search/shared';
 import { ChatRepository } from './chat.repository.js';
 import { DRAFT_PROMPT, INTERVIEW_PROMPT, REFINE_PROMPT } from './prompts.js';
 
@@ -82,6 +83,18 @@ export class ChatService {
     const resume = await this.resumes.createFromText(text);
     this.repo.linkResume(sessionId, resume.id);
     return resume;
+  }
+
+  async applyToResume(sessionId: string): Promise<ImprovedVersion> {
+    const session = this.repo.findSession(sessionId);
+    if (!session?.resumeId) throw new BadRequestException('Open this chat from a resume to apply it.');
+    const messages = this.repo.messages(sessionId);
+    if (!messages.some((m) => m.role === 'user')) throw new BadRequestException('Chat first, then apply the changes.');
+    const transcript = messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
+    return this.versions.improve(session.resumeId, {
+      extra: `Chat between the user and a resume coach. Apply the edits the user asked for or agreed to, and add any new facts the user stated.\n\n${transcript}`,
+      revise: true,
+    });
   }
 
   private instructions(resumeId: string | null): string {

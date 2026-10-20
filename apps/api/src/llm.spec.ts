@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { simulateReadableStream, type UIMessage } from 'ai';
 import { MockLanguageModelV4 } from 'ai/test';
 import { loadEnv } from './config/env.js';
@@ -79,7 +80,7 @@ describe('ResumeImproverService', () => {
       changeNotes: ['tightened bullets'],
       openQuestions: [],
     };
-    await expect(new ResumeImproverService(jsonModel(out), env).improve('text')).resolves.toEqual(out);
+    await expect(new ResumeImproverService(jsonModel(out), env).improve({ original: 'text' })).resolves.toEqual(out);
   });
 });
 
@@ -117,6 +118,29 @@ describe('ChatService', () => {
     const other = '22222222-2222-4222-8222-222222222222';
     await drain(await svc.stream(other, userMsg('same', 'theirs'), null));
     expect(JSON.stringify(svc.history(sid).messages[0].parts)).toContain('mine');
+  });
+
+  it('applies the chat to the linked resume by revising the latest version', async () => {
+    const db = openDb(':memory:');
+    const resume = db.insert(resumesTable).values({ originalText: 'Asha', expiresAt: new Date(Date.now() + 1e6) }).returning().get();
+    const calls: unknown[] = [];
+    const versions = { latest: () => { throw new NotFoundException('none'); }, improve: async (...a: unknown[]) => (calls.push(a), { id: 'v1' }) } as unknown as VersionsService;
+    const repo = new ChatRepository(db);
+    const svc = new ChatService(textModel('Sure, shortening it.'), env, repo, { getRow: () => resume } as unknown as ResumeService, versions);
+
+    await drain(await svc.stream(sid, userMsg('u1', 'Please shorten my summary'), resume.id));
+    await svc.applyToResume(sid);
+
+    const [id, opts] = calls[0] as [string, { extra: string; revise: boolean }];
+    expect(id).toBe(resume.id);
+    expect(opts.revise).toBe(true);
+    expect(opts.extra).toContain('User: Please shorten my summary');
+  });
+
+  it('refuses to apply a chat that is not linked to a resume', async () => {
+    const { svc } = setup('ok');
+    await drain(await svc.stream(sid, userMsg('u1', 'hi'), null));
+    await expect(svc.applyToResume(sid)).rejects.toThrow(/Open this chat from a resume/);
   });
 
   it('refuses to create a resume from a too-short conversation', async () => {

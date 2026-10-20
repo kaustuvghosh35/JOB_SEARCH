@@ -34,6 +34,11 @@ export class ChatController {
     return this.chat.history(sessionId);
   }
 
+  @Post(':sessionId/apply')
+  apply(@Param('sessionId', ParseUUIDPipe) sessionId: string) {
+    return this.chat.applyToResume(sessionId);
+  }
+
   @Post(':sessionId/resume')
   createResume(@Param('sessionId', ParseUUIDPipe) sessionId: string) {
     return this.chat.createResume(sessionId);

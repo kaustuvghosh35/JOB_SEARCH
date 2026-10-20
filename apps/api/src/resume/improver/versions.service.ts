@@ -8,6 +8,8 @@ import { VersionRepository, type VersionRow } from './version.repository.js';
 
 export type ExportFormat = 'docx' | 'pdf';
 
+export type ImproveOptions = { targetRole?: string; extra?: string; revise?: boolean };
+
 const toVersion = (v: VersionRow): ImprovedVersion => ({
   id: v.id,
   resumeId: v.resumeId,
@@ -24,10 +26,18 @@ export class VersionsService {
     @Inject(ResumeExportService) private readonly exporter: ResumeExportService,
   ) {}
 
-  async improve(resumeId: string, targetRole?: string): Promise<ImprovedVersion> {
+  async improve(resumeId: string, opts: ImproveOptions = {}): Promise<ImprovedVersion> {
     const row = this.resumes.getRow(resumeId);
-    const improved = await this.improver.improve(row.originalText, targetRole?.trim() || undefined);
-    return toVersion(this.versions.create(resumeId, withFactWarnings(row.originalText, improved)));
+    const extra = opts.extra?.trim() || undefined;
+    const base = opts.revise ? this.versions.latest(resumeId)?.improved : undefined;
+    const improved = await this.improver.improve({
+      original: row.originalText,
+      targetRole: opts.targetRole?.trim() || undefined,
+      extra,
+      base,
+    });
+    const known = [row.originalText, extra, base && JSON.stringify(base)].filter(Boolean).join('\n');
+    return toVersion(this.versions.create(resumeId, withFactWarnings(known, improved)));
   }
 
   latest(resumeId: string): ImprovedVersion {

@@ -36,13 +36,17 @@ function ChatInner({
   initialMessages,
   storageKey,
   placeholder,
+  onApplied,
 }: {
   sessionId: string;
   resumeId: string | null;
   initialMessages: UIMessage[];
   storageKey: string;
   placeholder: string;
+  onApplied?: () => void;
 }) {
+  const [applying, setApplying] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
   const router = useRouter();
   const [input, setInput] = useState("");
   const [creating, setCreating] = useState(false);
@@ -80,6 +84,19 @@ function ChatInner({
     } catch (e) {
       setCreateError(e instanceof Error ? e.message : "Could not create the resume.");
       setCreating(false);
+    }
+  }
+
+  async function applyChat() {
+    setApplying(true);
+    setApplyError(null);
+    try {
+      await api(`/chat/${sessionId}/apply`, { method: "POST" });
+      onApplied?.();
+    } catch (e) {
+      setApplyError(e instanceof Error ? e.message : "Could not apply the chat.");
+    } finally {
+      setApplying(false);
     }
   }
 
@@ -131,6 +148,20 @@ function ChatInner({
         </Button>
       </form>
 
+      {resumeId && userTurns >= 1 && (
+        <div className="flex flex-col items-start gap-2">
+          <Button variant="outline" onClick={applyChat} disabled={applying || busy}>
+            {applying ? "Applying..." : "Apply this chat to my resume"}
+          </Button>
+          <p className="text-xs text-muted-foreground">Updates the improved resume with the changes and facts from this chat.</p>
+          {applyError && (
+            <p role="alert" className="text-sm font-medium">
+              {applyError}
+            </p>
+          )}
+        </div>
+      )}
+
       {!resumeId && userTurns >= MIN_USER_MESSAGES && (
         <div className="flex flex-col items-start gap-2">
           <Button variant="outline" onClick={createResume} disabled={creating || busy}>
@@ -147,7 +178,17 @@ function ChatInner({
   );
 }
 
-export function ChatPanel({ storageKey, resumeId, placeholder }: { storageKey: string; resumeId: string | null; placeholder: string }) {
+export function ChatPanel({
+  storageKey,
+  resumeId,
+  placeholder,
+  onApplied,
+}: {
+  storageKey: string;
+  resumeId: string | null;
+  placeholder: string;
+  onApplied?: () => void;
+}) {
   const sessionId = useSessionId(storageKey);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +203,13 @@ export function ChatPanel({ storageKey, resumeId, placeholder }: { storageKey: s
   if (error) return <p role="alert" className="font-medium">{error}</p>;
   if (!sessionId || !initial) return <div className="h-64 animate-pulse rounded-lg bg-muted" aria-label="Loading" />;
   return (
-    <ChatInner sessionId={sessionId} resumeId={resumeId} initialMessages={initial} storageKey={storageKey} placeholder={placeholder} />
+    <ChatInner
+      sessionId={sessionId}
+      resumeId={resumeId}
+      initialMessages={initial}
+      storageKey={storageKey}
+      placeholder={placeholder}
+      onApplied={onApplied}
+    />
   );
 }

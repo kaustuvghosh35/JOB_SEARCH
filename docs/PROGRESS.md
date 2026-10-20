@@ -42,6 +42,8 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 
 - 2026-10-20 — Bug: every AI call returned 500. Cause: free-tier Gemini quota (20 requests/day per model) exhausted on `gemini-3-flash-preview` by testing; error filter missed the SDK's `RetryError`. Fix: default `gemini-3.5-flash` plus model fallback chain, filter now returns a clear 429. 41 tests pass; profile (7 s), improve (16 s), chat verified live.
 
+- 2026-10-20 — New: extra details + "build on current version" on the Improved tab; "Apply this chat to my resume" on the Chat tab (switches to the Improved tab with the new version). Verified live: chat fact "2 million transactions a day" appeared in the new version. 44 API tests pass.
+
 ## Needs from you (to finish)
 1. Try your own real resumes (PDF with columns/tables especially) and read the improved text for embellishment
 2. Hosting: run locally, or deploy (API needs a volume for SQLite)

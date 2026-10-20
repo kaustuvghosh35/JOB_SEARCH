@@ -10,17 +10,36 @@ export const IMPROVER_SYSTEM = `You are an expert resume editor for ATS-friendly
 Rewrite the resume to be clearer, more concise and more impactful.
 
 Rules:
-- Use ONLY facts in the source resume. Never invent employers, titles, dates, degrees, skills, tools, numbers or achievements.
-- Every bullet must restate something written in the source. A stronger verb is fine; a new duty, collaboration, scale word (high-traffic, scalable, enterprise), tool, audience or outcome is NOT. Example: source "built REST APIs for an insurance claims app" must not become "built scalable REST APIs for a high-traffic application" or "collaborated with cross-functional teams".
+- Use ONLY facts in the source resume or in the "Extra details from the user" section. Never invent employers, titles, dates, degrees, skills, tools, numbers or achievements.
+- Extra details are facts or edit requests from the user: add the facts and apply the requested edits. In a chat transcript, follow only what the User asked for or agreed to; ignore Coach suggestions the User did not accept.
+- If a "Current improved version" is given, revise it instead of starting over, keeping everything the user did not ask to change.
+- Every bullet must restate something written in the source or the extra details. A stronger verb is fine; a new duty, collaboration, scale word (high-traffic, scalable, enterprise), tool, audience or outcome is NOT. Example: source "built REST APIs for an insurance claims app" must not become "built scalable REST APIs for a high-traffic application" or "collaborated with cross-functional teams".
 - Do not change what the person did (built stays built; do not turn it into optimized or led).
 - Keep contact details exactly as given.
 - Start each bullet with a strong action verb; keep bullets to one or two lines; prefer results over duties.
-- Where a number would strengthen a bullet but the source has none, do NOT make one up: keep the bullet as is and add a question to "openQuestions" (e.g. "How many users did the payments service handle?").
+- Where a number would strengthen a bullet but the source has none, do NOT make one up: keep the bullet as is and add a question to "openQuestions" (e.g. "How many users did the payments service handle?"). Drop questions the extra details already answer.
 - Use standard section content: summary, experience (newest first), education, skills, extras (projects, certifications, etc.).
 - Weave in role-relevant keywords only if the resume already supports them.
 - "changeNotes": 4-8 short notes on what you changed and why. Only claim a change you actually made; never say you quantified anything unless the numbers were in the source.
 - Where the source is thin, keep the bullet short and put a question in "openQuestions" instead of padding.
 - Write in the same language as the source.`;
+
+export type ImproveInput = {
+  original: string;
+  targetRole?: string;
+  extra?: string;
+  base?: ImprovedResume;
+};
+
+const buildPrompt = ({ original, targetRole, extra, base }: ImproveInput) =>
+  [
+    targetRole && `Target role: ${targetRole}`,
+    `Resume (original):\n${original}`,
+    base && `Current improved version (JSON):\n${JSON.stringify(base)}`,
+    extra && `Extra details from the user:\n${extra}`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 
 @Injectable()
 export class ResumeImproverService {
@@ -29,7 +48,7 @@ export class ResumeImproverService {
     @Inject(ENV) private readonly env: Env,
   ) {}
 
-  async improve(originalText: string, targetRole?: string): Promise<ImprovedResume> {
+  async improve(input: ImproveInput): Promise<ImprovedResume> {
     if (!this.env.GEMINI_API_KEY) {
       throw new ServiceUnavailableException('GEMINI_API_KEY is not configured on the server.');
     }
@@ -38,7 +57,7 @@ export class ResumeImproverService {
       output: Output.object({ schema: improvedResumeSchema }),
       providerOptions,
       system: IMPROVER_SYSTEM,
-      prompt: targetRole ? `Target role: ${targetRole}\n\nResume:\n${originalText}` : `Resume:\n${originalText}`,
+      prompt: buildPrompt(input),
     });
     return output;
   }

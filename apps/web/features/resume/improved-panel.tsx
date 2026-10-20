@@ -68,6 +68,8 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
   const [original, setOriginal] = useState<string | null>(null);
   const [version, setVersion] = useState<ImprovedVersion | null>(null);
   const [targetRole, setTargetRole] = useState(defaultRole);
+  const [extra, setExtra] = useState("");
+  const [revise, setRevise] = useState(true);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,15 +90,16 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
         await api<ImprovedVersion>(`/resumes/${resumeId}/improve`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ targetRole }),
+          body: JSON.stringify({ targetRole, extra, revise: revise && version !== null }),
         }),
       );
+      setExtra("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not improve the resume.");
     } finally {
       setBusy(false);
     }
-  }, [resumeId, targetRole]);
+  }, [resumeId, targetRole, extra, revise, version]);
 
   return (
     <section className="flex flex-col gap-6" aria-labelledby="improved-heading">
@@ -115,6 +118,20 @@ export function ImprovedPanel({ resumeId, defaultRole }: { resumeId: string; def
         <Button type="submit" disabled={busy}>
           {busy ? "Improving..." : version ? "Improve again" : "Improve my resume"}
         </Button>
+        <textarea
+          aria-label="Extra details"
+          value={extra}
+          onChange={(e) => setExtra(e.target.value)}
+          rows={3}
+          placeholder="Extra details or changes (optional): facts to add, answers to the questions below, or edits you want"
+          className="w-full resize-y rounded-lg border border-border bg-background p-3 text-sm focus-visible:outline-2"
+        />
+        {version && (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={revise} onChange={(e) => setRevise(e.target.checked)} />
+            Build on the current improved version (otherwise start again from the original)
+          </label>
+        )}
       </form>
 
       {error && (
