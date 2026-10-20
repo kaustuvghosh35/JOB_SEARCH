@@ -16,6 +16,8 @@ const chatBody = z.object({
   resumeId: z.uuid().nullish(),
 });
 
+const applyBody = z.object({ targetRole: z.string().max(120).optional() }).default({});
+
 @Controller('chat')
 export class ChatController {
   constructor(@Inject(ChatService) private readonly chat: ChatService) {}
@@ -35,8 +37,10 @@ export class ChatController {
   }
 
   @Post(':sessionId/apply')
-  apply(@Param('sessionId', ParseUUIDPipe) sessionId: string) {
-    return this.chat.applyToResume(sessionId);
+  apply(@Param('sessionId', ParseUUIDPipe) sessionId: string, @Body() body: unknown) {
+    const parsed = applyBody.safeParse(body ?? {});
+    if (!parsed.success) throw new BadRequestException('Invalid body.');
+    return this.chat.applyToResume(sessionId, parsed.data.targetRole);
   }
 
   @Post(':sessionId/resume')

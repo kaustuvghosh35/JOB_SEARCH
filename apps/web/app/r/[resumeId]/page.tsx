@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
 import { JobsPanel } from "@/features/jobs/jobs-panel";
@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 
 export default function ResumePage() {
   const { resumeId } = useParams<{ resumeId: string }>();
+  const query = useSearchParams();
   const [resume, setResume] = useState<ResumeView | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,8 +43,8 @@ export default function ResumePage() {
           </div>
           <JobsPanel
             resumeId={resume.id}
-            defaultRole={resume.profile.headline}
-            defaultLocation={resume.profile.location?.split(",")[0]?.trim() ?? ""}
+            defaultRole={query.get("role") || resume.profile.headline}
+            defaultLocation={query.get("location") || resume.profile.location?.split(",")[0]?.trim() || ""}
           />
         </>
       )}

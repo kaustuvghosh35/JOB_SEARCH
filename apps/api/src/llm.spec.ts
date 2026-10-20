@@ -125,9 +125,10 @@ describe('ChatService', () => {
     const svc = new ChatService(textModel('Sure, shortening it.'), env, repo, { getRow: () => resume } as unknown as ResumeService, versions);
 
     await drain(await svc.stream(sid, userMsg('u1', 'Please shorten my summary'), resume.id));
-    await svc.applyToResume(sid);
+    await svc.applyToResume(sid, 'Backend Engineer');
 
-    const [id, opts] = calls[0] as [string, { extra: string; revise: boolean }];
+    const [id, opts] = calls[0] as [string, { extra: string; revise: boolean; targetRole: string }];
+    expect(opts.targetRole).toBe('Backend Engineer');
     expect(id).toBe(resume.id);
     expect(opts.revise).toBe(true);
     expect(opts.extra).toContain('User: Please shorten my summary');

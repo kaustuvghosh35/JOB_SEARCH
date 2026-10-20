@@ -39,6 +39,7 @@ function ChatInner({
   onApplied,
   onApplying,
   createdHref,
+  targetRole,
 }: {
   sessionId: string;
   resumeId: string | null;
@@ -48,6 +49,7 @@ function ChatInner({
   onApplied?: () => void;
   onApplying?: (busy: boolean) => void;
   createdHref?: (resumeId: string) => string;
+  targetRole?: string;
 }) {
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
@@ -96,7 +98,11 @@ function ChatInner({
     onApplying?.(true);
     setApplyError(null);
     try {
-      await api(`/chat/${sessionId}/apply`, { method: "POST" });
+      await api(`/chat/${sessionId}/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetRole }),
+      });
       onApplied?.();
     } catch (e) {
       setApplyError(e instanceof Error ? e.message : "Could not apply the chat.");
@@ -191,6 +197,7 @@ export function ChatPanel({
   onApplied,
   onApplying,
   createdHref,
+  targetRole,
 }: {
   storageKey: string;
   resumeId: string | null;
@@ -198,6 +205,7 @@ export function ChatPanel({
   onApplied?: () => void;
   onApplying?: (busy: boolean) => void;
   createdHref?: (resumeId: string) => string;
+  targetRole?: string;
 }) {
   const sessionId = useSessionId(storageKey);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
@@ -222,6 +230,7 @@ export function ChatPanel({
       onApplied={onApplied}
       onApplying={onApplying}
       createdHref={createdHref}
+      targetRole={targetRole}
     />
   );
 }

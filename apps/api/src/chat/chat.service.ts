@@ -85,13 +85,14 @@ export class ChatService {
     return resume;
   }
 
-  async applyToResume(sessionId: string): Promise<ImprovedVersion> {
+  async applyToResume(sessionId: string, targetRole?: string): Promise<ImprovedVersion> {
     const session = this.repo.findSession(sessionId);
     if (!session?.resumeId) throw new BadRequestException('Open this chat from a resume to apply it.');
     const messages = this.repo.messages(sessionId);
     if (!messages.some((m) => m.role === 'user')) throw new BadRequestException('Chat first, then apply the changes.');
     const transcript = messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
     return this.versions.improve(session.resumeId, {
+      targetRole,
       extra: `Chat between the user and a resume coach. Apply the edits the user asked for or agreed to, and add any new facts the user stated.\n\n${transcript}`,
       revise: true,
     });

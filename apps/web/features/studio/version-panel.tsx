@@ -8,8 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_URL, api } from "@/lib/api";
 import { consumeAutoImprove } from "./auto-improve";
 
-const field = "h-9 rounded-lg border border-border bg-background px-3 text-sm focus-visible:outline-2";
-
 function ResumeDocument({ resume }: { resume: ImprovedResume }) {
   return (
     <article className="flex flex-col gap-4 text-sm">
@@ -56,17 +54,16 @@ const frame = "max-h-[62vh] overflow-auto rounded-lg border border-border p-4";
 
 export function VersionPanel({
   resumeId,
-  defaultRole,
+  targetRole,
   externalBusy = false,
 }: {
   resumeId: string;
-  defaultRole: string;
+  targetRole: string;
   externalBusy?: boolean;
 }) {
   const [ready, setReady] = useState(false);
   const [original, setOriginal] = useState<string | null>(null);
   const [version, setVersion] = useState<ImprovedVersion | null>(null);
-  const [targetRole, setTargetRole] = useState(defaultRole);
   const [extra, setExtra] = useState("");
   const [revise, setRevise] = useState(true);
   const [compare, setCompare] = useState<"previous" | "original">("previous");
@@ -121,8 +118,16 @@ export function VersionPanel({
           void improve();
         }}
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <input aria-label="Target role" className={`${field} min-w-0 flex-1`} value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="Target role (optional)" />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="min-w-0 text-sm text-muted-foreground">
+            {targetRole.trim() ? (
+              <>
+                Tailored for <span className="font-medium text-foreground">{targetRole.trim()}</span>
+              </>
+            ) : (
+              "Not tailored to a role. Set one above to focus the resume."
+            )}
+          </p>
           <Button type="submit" disabled={busy || loading || externalBusy}>
             {busy && <Spinner />}
             {busy ? "Improving..." : version ? "Improve again" : "Improve my resume"}
