@@ -59,3 +59,5 @@ Total ≈ 7–10 working days solo. Phases 3 and 4 are independent after Phase 2
 - 2026-10-21 — Studio start is now a single page (upload or type resume/notes) that auto-improves on arrival in the workspace. Verified in browser with rough notes → workspace → improved resume. 48 API tests pass.
 
 - 2026-10-21 — Free-form resume sections. "Move experience below skills" failed because the format had fixed fields; replaced with a list of sections the AI fully controls (add/rename/reorder/split/merge). Verified live: one chat request renamed Summary to Profile, added Projects first, split Skills into two groups and moved Experience; page and DOCX match. Old versions are converted automatically. 52 API tests pass.
+
+- 2026-10-21 — Root README rewritten for GitHub. Behaviour-neutral refactor (see decision 41; 55 tests pass, workspace, jobs, cache, export re-checked). Technical docs added under `docs/architecture/` (overview, flows, API, AI and data, web). Mermaid diagrams were written for GitHub rendering and not rendered locally.

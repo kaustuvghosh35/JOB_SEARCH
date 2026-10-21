@@ -1,5 +1,7 @@
 # Job Search POC — Master Plan
 
+> Historical document, written before the build. For how the system works today, read [architecture/](architecture/README.md). Main changes since this plan: Google Gemini replaced Claude, the resume is now a free-form list of sections, the studio page replaced the Improved and Chat tabs, and the job query also uses seniority and years. Reasons for each change are in [DECISIONS.md](DECISIONS.md).
+
 Progress lives in [PROGRESS.md](PROGRESS.md). Phase details live in [phases/](phases/).
 
 ## Context
