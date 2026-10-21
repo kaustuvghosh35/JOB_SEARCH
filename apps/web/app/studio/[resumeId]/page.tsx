@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { ResumeView } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const field = "h-9 w-full rounded-lg border border-border bg-background px-3 tex
 export default function StudioWorkspace() {
   const { resumeId } = useParams<{ resumeId: string }>();
   const router = useRouter();
+  const cameFromJobs = useSearchParams().get("from") === "jobs";
   const [resume, setResume] = useState<ResumeView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [versionTick, setVersionTick] = useState(0);
@@ -52,8 +53,11 @@ export default function StudioWorkspace() {
 
   return (
     <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-8 px-4 py-14">
-      <Link href="/studio" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Resume studio
+      <Link
+        href={cameFromJobs ? `/r/${resumeId}?${new URLSearchParams({ role: role.trim(), location: location.trim() })}` : "/studio"}
+        className="text-sm text-muted-foreground hover:text-foreground"
+      >
+        {cameFromJobs ? "← Back to jobs" : "← Resume studio"}
       </Link>
 
       {error && (

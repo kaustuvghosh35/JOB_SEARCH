@@ -20,6 +20,8 @@ flowchart LR
   Jobs -->|Improve or edit this resume| Work
 ```
 
+**Back link on the workspace.** The jobs page opens the workspace with `?from=jobs`. When that is present, the top link reads "Back to jobs" and returns to `/r/<id>` with the current role and location; otherwise it reads "Resume studio" and goes to `/studio`.
+
 ## Components
 
 | Component | File | Responsibility |

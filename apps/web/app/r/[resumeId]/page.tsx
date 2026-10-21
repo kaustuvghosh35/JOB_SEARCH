@@ -26,7 +26,7 @@ export default function ResumePage() {
         <Link href="/" className="hover:text-foreground">
           ← New resume
         </Link>
-        <Link href={`/studio/${resumeId}`} className="font-medium text-foreground underline underline-offset-4">
+        <Link href={`/studio/${resumeId}?from=jobs`} className="font-medium text-foreground underline underline-offset-4">
           Improve or edit this resume
         </Link>
       </nav>
