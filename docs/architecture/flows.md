@@ -14,7 +14,7 @@ sequenceDiagram
   participant DB as SQLite
   U->>API: POST /resumes (file) or POST /resumes/text
   API->>S: createFromFile / createFromText
-  S->>S: file -> text (parsers) ; text -> normalize and length check
+  S->>S: file -> text (parsers) <br/> text -> normalize and length check
   S->>P: extract(text)
   P->>G: structured profile request
   G-->>P: profile
