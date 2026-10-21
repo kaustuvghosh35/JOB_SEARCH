@@ -9,6 +9,7 @@ import { providerOptions } from '../llm/provider-options.js';
 const SYSTEM = `You extract a structured profile from a resume.
 Use only facts present in the resume. Never guess a value: use null where the schema allows it.
 "headline" is the person's current or most recent job title; if they are a fresher, use their target role.
+If the resume gives both a company designation (such as Associate Consultant) and the functional role they actually do (such as UI/API Developer), use the functional role, because the headline is used to search for jobs. For the same text always make the same choice.
 "skills" are concrete tools, languages, frameworks and domains, most important first.
 Write the summary without gendered pronouns (use the person's name or "they").`;
 
