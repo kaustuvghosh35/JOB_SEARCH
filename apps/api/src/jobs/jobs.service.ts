@@ -1,5 +1,6 @@
 import { BadGatewayException, BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import type { Job } from '@job-search/shared';
+import { hoursToMs } from '../common/time.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { ResumeService } from '../resume/resume.service.js';
@@ -24,7 +25,7 @@ export class JobsService {
     const { profile } = this.resumes.getRow(resumeId);
     if (!profile) throw new BadRequestException('This resume has no profile yet.');
 
-    const maxAge = this.env.JOB_CACHE_TTL_HOURS * 3_600_000;
+    const maxAge = hoursToMs(this.env.JOB_CACHE_TTL_HOURS);
     const outcomes = await Promise.allSettled(
       buildQueries(profile, filters).map(async (req): Promise<SearchHit[]> => {
         const cached = this.cache.get(req, maxAge);

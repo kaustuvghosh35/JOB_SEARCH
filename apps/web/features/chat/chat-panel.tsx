@@ -30,6 +30,16 @@ function useSessionId(storageKey: string) {
 
 const textOf = (m: UIMessage) => m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
 
+type ChatPanelProps = {
+  storageKey: string;
+  resumeId: string | null;
+  placeholder: string;
+  onApplied?: () => void;
+  onApplying?: (busy: boolean) => void;
+  createdHref?: (resumeId: string) => string;
+  targetRole?: string;
+};
+
 function ChatInner({
   sessionId,
   resumeId,
@@ -40,24 +50,14 @@ function ChatInner({
   onApplying,
   createdHref,
   targetRole,
-}: {
-  sessionId: string;
-  resumeId: string | null;
-  initialMessages: UIMessage[];
-  storageKey: string;
-  placeholder: string;
-  onApplied?: () => void;
-  onApplying?: (busy: boolean) => void;
-  createdHref?: (resumeId: string) => string;
-  targetRole?: string;
-}) {
+}: ChatPanelProps & { sessionId: string; initialMessages: UIMessage[] }) {
+  const router = useRouter();
+  const bottom = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState("");
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
-  const router = useRouter();
-  const [input, setInput] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const bottom = useRef<HTMLDivElement>(null);
 
   const transport = useMemo(
     () =>
@@ -190,23 +190,8 @@ function ChatInner({
   );
 }
 
-export function ChatPanel({
-  storageKey,
-  resumeId,
-  placeholder,
-  onApplied,
-  onApplying,
-  createdHref,
-  targetRole,
-}: {
-  storageKey: string;
-  resumeId: string | null;
-  placeholder: string;
-  onApplied?: () => void;
-  onApplying?: (busy: boolean) => void;
-  createdHref?: (resumeId: string) => string;
-  targetRole?: string;
-}) {
+export function ChatPanel(props: ChatPanelProps) {
+  const { storageKey } = props;
   const sessionId = useSessionId(storageKey);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -221,16 +206,6 @@ export function ChatPanel({
   if (error) return <p role="alert" className="font-medium">{error}</p>;
   if (!sessionId || !initial) return <div className="h-64 animate-pulse rounded-lg bg-muted" aria-label="Loading" />;
   return (
-    <ChatInner
-      sessionId={sessionId}
-      resumeId={resumeId}
-      initialMessages={initial}
-      storageKey={storageKey}
-      placeholder={placeholder}
-      onApplied={onApplied}
-      onApplying={onApplying}
-      createdHref={createdHref}
-      targetRole={targetRole}
-    />
+    <ChatInner {...props} sessionId={sessionId} initialMessages={initial} />
   );
 }

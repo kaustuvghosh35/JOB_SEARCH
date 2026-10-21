@@ -24,7 +24,7 @@ const profiles = [
 const summary = [];
 const raw = [];
 for (const p of profiles) {
-  for (const { query, location } of buildQueries({ ...p, skills: p.skills }, {})) {
+  for (const { query, location } of buildQueries(p, {})) {
     const url = new URL('https://api.search.tinyfish.ai');
     url.searchParams.set('query', query);
     if (location) url.searchParams.set('location', location);

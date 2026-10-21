@@ -8,13 +8,14 @@ import {
   type LanguageModel,
   type UIMessage,
 } from 'ai';
+import type { ImprovedVersion } from '@job-search/shared';
+import { hoursFromNow } from '../common/time.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { LLM_MODEL } from '../llm/llm.module.js';
 import { providerOptions } from '../llm/provider-options.js';
 import { VersionsService } from '../resume/improver/versions.service.js';
 import { ResumeService, type ResumeView } from '../resume/resume.service.js';
-import type { ImprovedVersion } from '@job-search/shared';
 import { ChatRepository } from './chat.repository.js';
 import { DRAFT_PROMPT, INTERVIEW_PROMPT, REFINE_PROMPT } from './prompts.js';
 
@@ -26,6 +27,9 @@ const textOf = (m: UIMessage) =>
     .map((p) => (p.type === 'text' ? p.text : ''))
     .join('')
     .trim();
+
+const toTranscript = (messages: UIMessage[]) =>
+  messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
 
 @Injectable()
 export class ChatService {
@@ -78,8 +82,7 @@ export class ChatService {
     if (messages.filter((m) => m.role === 'user').length < MIN_USER_MESSAGES) {
       throw new BadRequestException('Tell me a bit more about your background first.');
     }
-    const transcript = messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
-    const { text } = await generateText({ model: this.model, instructions: DRAFT_PROMPT, prompt: transcript, providerOptions });
+    const { text } = await generateText({ model: this.model, instructions: DRAFT_PROMPT, prompt: toTranscript(messages), providerOptions });
     const resume = await this.resumes.createFromText(text);
     this.repo.linkResume(sessionId, resume.id);
     return resume;
@@ -90,10 +93,9 @@ export class ChatService {
     if (!session?.resumeId) throw new BadRequestException('Open this chat from a resume to apply it.');
     const messages = this.repo.messages(sessionId);
     if (!messages.some((m) => m.role === 'user')) throw new BadRequestException('Chat first, then apply the changes.');
-    const transcript = messages.map((m) => `${m.role === 'user' ? 'User' : 'Coach'}: ${textOf(m)}`).join('\n');
     return this.versions.improve(session.resumeId, {
       targetRole,
-      extra: `Chat between the user and a resume coach. Apply the edits the user asked for or agreed to, and add any new facts the user stated.\n\n${transcript}`,
+      extra: `Chat between the user and a resume coach. Apply the edits the user asked for or agreed to, and add any new facts the user stated.\n\n${toTranscript(messages)}`,
       revise: true,
     });
   }
@@ -111,7 +113,7 @@ export class ChatService {
   }
 
   private expiry() {
-    return new Date(Date.now() + this.env.RESUME_TTL_HOURS * 3_600_000);
+    return hoursFromNow(this.env.RESUME_TTL_HOURS);
   }
 
   private requireKey() {

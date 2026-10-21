@@ -1,54 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { entryHeading, type ImprovedResume, type ImprovedVersion } from "@job-search/shared";
+import type { ImprovedVersion } from "@job-search/shared";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock, Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { API_URL, api } from "@/lib/api";
 import { consumeAutoImprove } from "./auto-improve";
-
-function ResumeDocument({ resume }: { resume: ImprovedResume }) {
-  return (
-    <article className="flex flex-col gap-4 text-sm">
-      <header>
-        {resume.fullName && <h3 className="text-lg font-semibold">{resume.fullName}</h3>}
-        {resume.contact.length > 0 && <p className="text-muted-foreground">{resume.contact.join(" · ")}</p>}
-      </header>
-      {resume.sections.map((s, i) => (
-        <section key={i} className="flex flex-col gap-2">
-          <h4 className="font-semibold uppercase tracking-wide">{s.title}</h4>
-          {s.paragraph && <p>{s.paragraph}</p>}
-          {s.entries.map((e, j) => (
-            <div key={j} className="flex flex-col gap-1">
-              <p className="font-medium">
-                {entryHeading(e)}
-                {e.period && <span className="font-normal text-muted-foreground"> · {e.period}</span>}
-              </p>
-              {e.bullets.length > 0 && (
-                <ul className="list-disc pl-5">
-                  {e.bullets.map((b, k) => (
-                    <li key={k}>{b}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-          {s.items.length > 0 &&
-            (s.itemsStyle === "inline" ? (
-              <p>{s.items.join(", ")}</p>
-            ) : (
-              <ul className="list-disc pl-5">
-                {s.items.map((t, k) => (
-                  <li key={k}>{t}</li>
-                ))}
-              </ul>
-            ))}
-        </section>
-      ))}
-    </article>
-  );
-}
+import { ResumeDocument } from "./resume-document";
 
 const frame = "max-h-[62vh] overflow-auto rounded-lg border border-border p-4";
 
@@ -61,16 +20,17 @@ export function VersionPanel({
   targetRole: string;
   externalBusy?: boolean;
 }) {
-  const [ready, setReady] = useState(false);
-  const wanted = targetRole.trim();
   const [original, setOriginal] = useState<string | null>(null);
   const [version, setVersion] = useState<ImprovedVersion | null>(null);
   const [extra, setExtra] = useState("");
   const [revise, setRevise] = useState(true);
   const [compare, setCompare] = useState<"previous" | "original">("previous");
-  const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const wanted = targetRole.trim();
   const current = version?.resume.targetRole?.trim() ?? "";
   const retailor = version !== null && current.toLowerCase() !== wanted.toLowerCase();
 

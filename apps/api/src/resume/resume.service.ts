@@ -1,10 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Profile } from '@job-search/shared';
+import { hoursFromNow } from '../common/time.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { ProfileService } from '../profile/profile.service.js';
 import { parseResumeFile } from './parsers/parser.factory.js';
-import { MIN_RESUME_CHARS, normalizeText, ResumeParseError } from './parsers/resume-parser.js';
+import { normalizeText, ResumeParseError } from './parsers/resume-parser.js';
 import { ResumeRepository, type ResumeRow } from './resume.repository.js';
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -65,7 +66,7 @@ export class ResumeService {
 
   private async save(text: string, filename: string | null, fileBlob: Buffer | null): Promise<ResumeView> {
     const profile = await this.profiles.extract(text);
-    const expiresAt = new Date(Date.now() + this.env.RESUME_TTL_HOURS * 3_600_000);
+    const expiresAt = hoursFromNow(this.env.RESUME_TTL_HOURS);
     return toView(this.repo.create({ originalText: text, filename, fileBlob, profile, expiresAt }));
   }
 }

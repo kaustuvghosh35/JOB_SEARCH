@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { hoursToMs } from '../common/time.js';
 import { ENV } from '../config/config.module.js';
 import type { Env } from '../config/env.js';
 import { CleanupRepository } from './cleanup.repository.js';
@@ -20,7 +21,7 @@ export class CleanupService implements OnModuleInit {
   @Cron(CronExpression.EVERY_HOUR)
   purge() {
     const now = new Date();
-    const cacheCutoff = new Date(now.getTime() - this.env.JOB_CACHE_TTL_HOURS * 3_600_000);
+    const cacheCutoff = new Date(now.getTime() - hoursToMs(this.env.JOB_CACHE_TTL_HOURS));
     const removed = this.repo.purge(now, cacheCutoff);
     if (removed.resumes || removed.sessions || removed.jobCache) this.logger.log(`purged ${JSON.stringify(removed)}`);
   }

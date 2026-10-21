@@ -10,8 +10,6 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().default('gemini-3.5-flash'),
   GEMINI_FALLBACK_MODELS: z.string().default('gemini-3.1-flash-lite,gemini-3-flash-preview,gemini-3.6-flash'),
   TINYFISH_API_KEY: z.string().optional(),
-  TINYFISH_FETCH_ENRICH: z.stringbool().default(false),
-  ACCESS_CODE: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

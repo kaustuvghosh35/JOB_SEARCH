@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { normalizeResume, type ImprovedVersion } from '@job-search/shared';
 import { ProfileService } from '../../profile/profile.service.js';
-import { ResumeService, type ResumeView } from '../resume.service.js';
-import { resumeToText } from './render-text.js';
 import { ResumeExportService } from '../export/resume-export.service.js';
+import { ResumeService, type ResumeView } from '../resume.service.js';
 import { withFactWarnings } from './fact-check.js';
+import { resumeToText } from './render-text.js';
 import { ResumeImproverService } from './resume-improver.service.js';
 import { VersionRepository, type VersionRow } from './version.repository.js';
 
@@ -12,7 +12,7 @@ export type ExportFormat = 'docx' | 'pdf';
 
 export type ImproveOptions = { targetRole?: string; extra?: string; revise?: boolean };
 
-const toVersion = (v: VersionRow, previous: VersionRow | undefined = undefined): ImprovedVersion => ({
+const toVersion = (v: VersionRow, previous?: VersionRow): ImprovedVersion => ({
   id: v.id,
   resumeId: v.resumeId,
   createdAt: v.createdAt.toISOString(),

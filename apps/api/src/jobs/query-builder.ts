@@ -4,7 +4,7 @@ export type JobFilters = { role?: string; location?: string; remote?: boolean };
 
 export type PlannedQuery = { query: string; location?: string };
 
-// site: scoping is unverified against TinyFish; adjust here after the Phase 0 spike.
+// TinyFish honours site: scoping; these paths limit results to individual job pages.
 const SITE_SCOPES = ['site:linkedin.com/jobs/view', 'site:naukri.com/job-listings'];
 
 const SENIORITY_WORD: Record<Profile['seniority'], string | null> = {
